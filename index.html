@@ -1,0 +1,1034 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Darsh Radio</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Outfit:wght@400;600;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+
+    <style>
+        /* ── Hidden audio player engine ── */
+        #yt-player-wrap {
+            position: fixed;
+            bottom: 0;
+            right: 0;
+            width: 200px;
+            height: 120px;
+            opacity: 0.001; /* Active on-screen so browser never throttles streaming */
+            pointer-events: none;
+            z-index: -10;
+        }
+
+        /* ── Playlist tray ── slides in and out of the radio top slot ── */
+        .playlist-tray {
+            position: fixed;
+            bottom: 180px;
+            left: 50%;
+            transform: translateX(-50%) translateY(calc(100% - 32px));
+            width: min(480px, 96vw);
+            z-index: 10;
+            transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .playlist-tray.open {
+            transform: translateX(-50%) translateY(0);
+        }
+
+        /* Radio sits in front so tray slides directly inside it */
+        .scene {
+            position: relative;
+            z-index: 20;
+        }
+
+        /* Tray handle — stays docked on the radio top slot when closed */
+        .tray-handle {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 7px 16px;
+            background: linear-gradient(180deg, #3d2a10 0%, #2a1d09 100%);
+            border: 1px solid rgba(255, 160, 40, 0.25);
+            border-bottom: none;
+            border-radius: 8px 8px 0 0;
+            cursor: pointer;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 10px;
+            letter-spacing: 0.2em;
+            color: rgba(200, 140, 50, 0.85);
+            user-select: none;
+            box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.3);
+            transition: color 0.2s, background 0.2s;
+        }
+
+        .tray-handle:hover {
+            color: rgba(255, 190, 60, 1);
+            background: linear-gradient(180deg, #483214 0%, #32230b 100%);
+        }
+
+        .tray-arrow {
+            display: inline-block;
+            transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .playlist-tray.open .tray-arrow {
+            transform: rotate(180deg);
+        }
+
+        /* Scrollable song list — sits below handle, slides down into radio body */
+        .tray-body {
+            max-height: 260px;
+            overflow-y: auto;
+            background: linear-gradient(180deg, #201408 0%, #180f05 100%);
+            border: 1px solid rgba(255, 160, 40, 0.18);
+            border-top: none;
+            border-radius: 0;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
+        }
+
+        .tray-body::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .tray-body::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .tray-body::-webkit-scrollbar-thumb {
+            background: rgba(255, 160, 40, 0.25);
+            border-radius: 2px;
+        }
+
+        .track-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 14px;
+            cursor: pointer;
+            border-bottom: 1px solid rgba(255, 160, 40, 0.06);
+            transition: background 0.15s;
+        }
+
+        .track-item:hover {
+            background: rgba(255, 160, 40, 0.06);
+        }
+
+        .track-item.active {
+            background: rgba(255, 160, 40, 0.1);
+            border-left: 2px solid rgba(255, 160, 40, 0.5);
+        }
+
+        .track-num {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 9px;
+            color: rgba(200, 130, 40, 0.4);
+            width: 22px;
+            flex-shrink: 0;
+        }
+
+        .track-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .track-title {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 11px;
+            color: rgba(255, 180, 60, 0.8);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .track-artist {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 9px;
+            color: rgba(180, 120, 40, 0.5);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            margin-top: 1px;
+        }
+
+        .track-play-icon {
+            font-size: 10px;
+            color: rgba(255, 160, 40, 0.5);
+            flex-shrink: 0;
+        }
+
+        .track-item.active .track-play-icon {
+            color: #ffb030;
+        }
+
+        /* ── Mini spinning CD disc ── */
+        .cd-disc {
+            flex-shrink: 0;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            position: relative;
+            background:
+                radial-gradient(circle at 50% 50%,
+                    #1a1108 0%,
+                    #1a1108 18%,
+                    transparent 18%),
+                conic-gradient(from 0deg,
+                    rgba(255, 160, 40, 0.35),
+                    rgba(200, 100, 20, 0.2),
+                    rgba(255, 200, 80, 0.4),
+                    rgba(180, 80, 10, 0.2),
+                    rgba(255, 160, 40, 0.35)),
+                radial-gradient(circle, #3a2810 0%, #1a0e04 100%);
+            box-shadow:
+                0 0 0 1px rgba(255, 160, 40, 0.15),
+                inset 0 0 4px rgba(0, 0, 0, 0.6);
+            transition: opacity 0.2s;
+        }
+
+        /* Center hole */
+        .cd-disc::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #0e0804;
+            border: 1px solid rgba(255, 160, 40, 0.2);
+            box-shadow: 0 0 3px rgba(255, 140, 20, 0.3);
+        }
+
+        /* Glare highlight on CD */
+        .cd-disc::after {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 4px;
+            width: 7px;
+            height: 4px;
+            border-radius: 50%;
+            background: rgba(255, 220, 120, 0.22);
+            transform: rotate(-30deg);
+            pointer-events: none;
+        }
+
+        /* Spin only the active/playing track */
+        .track-item.active .cd-disc {
+            animation: cdSpin 3s linear infinite;
+            box-shadow:
+                0 0 0 1px rgba(255, 160, 40, 0.4),
+                0 0 8px rgba(255, 140, 20, 0.25),
+                inset 0 0 4px rgba(0, 0, 0, 0.5);
+        }
+
+        @keyframes cdSpin {
+            from {
+                transform: rotate(0deg);
+            }
+
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* LCD List button placed right after the LCD display */
+        .lcd-list-btn {
+            font-family: 'Share Tech Mono', monospace;
+            cursor: pointer;
+            border-radius: 6px;
+            margin: 0 4px 0 8px;
+            padding: 6px 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 2px;
+            user-select: none;
+            flex-shrink: 0;
+            background: linear-gradient(180deg, #3d2a10 0%, #2a1c08 60%, #1c1305 100%);
+            border: 1px solid rgba(255, 160, 40, 0.3);
+            box-shadow:
+                0 2px 0 rgba(0, 0, 0, 0.6),
+                0 3px 6px rgba(0, 0, 0, 0.4),
+                inset 0 1px 0 rgba(255, 180, 60, 0.2);
+            color: rgba(255, 180, 60, 0.85);
+            transition: transform 0.08s ease, box-shadow 0.08s ease, color 0.2s, background 0.2s, border-color 0.2s;
+        }
+
+        .lcd-list-btn:hover {
+            color: #ffb830;
+            border-color: rgba(255, 180, 40, 0.6);
+            box-shadow:
+                0 2px 0 rgba(0, 0, 0, 0.6),
+                0 0 10px rgba(255, 160, 40, 0.3),
+                inset 0 1px 0 rgba(255, 200, 80, 0.3);
+        }
+
+        .lcd-list-btn.pressed,
+        .lcd-list-btn:active {
+            transform: translateY(2px);
+            box-shadow:
+                0 0 0 rgba(0, 0, 0, 0.6),
+                0 1px 3px rgba(0, 0, 0, 0.4),
+                inset 0 2px 4px rgba(0, 0, 0, 0.6);
+        }
+
+        .lcd-list-btn.active {
+            background: linear-gradient(180deg, #5a3a08 0%, #3e2606 60%, #2b1a04 100%);
+            color: #ffc040;
+            border-color: rgba(255, 190, 60, 0.7);
+            box-shadow:
+                0 2px 0 rgba(0, 0, 0, 0.6),
+                0 0 12px rgba(255, 160, 40, 0.4),
+                inset 0 1px 0 rgba(255, 220, 100, 0.4);
+        }
+
+        .lcd-btn-icon {
+            font-size: 11px;
+            line-height: 1;
+        }
+
+        .lcd-btn-text {
+            font-size: 8px;
+            letter-spacing: 0.12em;
+            font-weight: bold;
+            line-height: 1;
+        }
+
+        /* List button in presets row */
+        .list-btn {
+            font-family: 'Share Tech Mono', monospace;
+            cursor: pointer;
+            border-radius: 4px;
+            padding: 5px 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1px;
+            user-select: none;
+            transition: transform 0.08s ease, box-shadow 0.08s ease, color 0.2s;
+            background: linear-gradient(180deg, #3a2810 0%, #2a1c08 55%, #1e1506 100%);
+            border: 1px solid rgba(255, 160, 40, 0.25);
+            box-shadow: 0 3px 0 rgba(0, 0, 0, 0.5), 0 4px 8px rgba(0, 0, 0, 0.4),
+                inset 0 1px 0 rgba(255, 180, 60, 0.12);
+            color: rgba(255, 160, 40, 0.75);
+        }
+
+        .list-btn:hover {
+            color: rgba(255, 200, 80, 1);
+        }
+
+        .list-btn:active {
+            transform: translateY(2px);
+        }
+
+        .list-btn.active {
+            color: #ffb030;
+            border-color: rgba(255, 180, 40, 0.5);
+            box-shadow: 0 3px 0 rgba(0, 0, 0, 0.5), 0 0 10px rgba(220, 140, 20, 0.2),
+                inset 0 1px 0 rgba(255, 200, 60, 0.18);
+        }
+
+        /* Track index on LCD */
+        .lcd-track-idx {
+            position: absolute;
+            top: 5px;
+            right: 8px;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 9px;
+            color: rgba(255, 160, 40, 0.35);
+            letter-spacing: 0.06em;
+        }
+
+        /* Progress bar below LCD shell */
+        .progress-wrap {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 0 2px;
+        }
+
+        .progress-bar-bg {
+            flex: 1;
+            height: 3px;
+            border-radius: 2px;
+            background: rgba(255, 160, 40, 0.12);
+            cursor: pointer;
+            position: relative;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            border-radius: 2px;
+            background: linear-gradient(90deg, #c87020, #ffb030);
+            width: 0%;
+            transition: width 0.3s linear;
+            pointer-events: none;
+        }
+
+        .progress-time {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 8px;
+            color: rgba(200, 140, 50, 0.4);
+            flex-shrink: 0;
+            width: 34px;
+            text-align: right;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- ══ Background Video Loop ══ -->
+    <video class="bg-video" autoplay muted loop playsinline poster="./bg.png">
+        <source src="./make_a_loop_video_of_this_imag.mp4" type="video/mp4">
+    </video>
+
+    <!-- Hidden Audio Player Engine -->
+    <div id="yt-player-wrap">
+        <div id="yt-player"></div>
+    </div>
+
+    <!-- YouTube IFrame API -->
+    <script src="https://www.youtube.com/iframe_api"></script>
+
+    <!-- ── Retro Playlist Tray ── -->
+    <div class="playlist-tray" id="playlistTray">
+        <div class="tray-handle" id="trayHandle">
+            <span>♫ &nbsp;PLAYLIST &nbsp;·&nbsp; 44 TRACKS</span>
+            <span class="tray-arrow">▲</span>
+        </div>
+        <div class="tray-body" id="trackList"></div>
+    </div>
+
+    <div class="scene">
+
+        <!-- ══ RADIO BODY ══════════════════════════════════════════════════ -->
+        <div class="radio-body">
+
+            <!-- Antenna -->
+            <div class="antenna-base">
+                <div class="antenna-pole"></div>
+            </div>
+
+            <!-- ── SPEAKER (left) ── -->
+            <div class="speaker-panel">
+                <div class="speaker-grille"></div>
+                <div class="speaker-logo">
+                    <span class="logo-text">DARSH</span>
+                    <span class="logo-sub">FM · RADIO</span>
+                </div>
+            </div>
+
+            <!-- ── CENTER PANEL ── -->
+            <div class="center-panel">
+
+                <!-- LCD frequency display -->
+                <div class="lcd-shell">
+                    <div class="lcd-screen">
+                        <div class="lcd-row">
+                            <span class="lcd-band">FM</span>
+                            <span class="lcd-freq" id="lcdFreq">98.7</span>
+                            <span class="lcd-mhz">MHz</span>
+                        </div>
+                        <div class="lcd-meta" id="lcdMeta">DARSH RADIO · TUNE IN TO PLAY</div>
+                        <span class="lcd-track-idx" id="lcdIdx">01/44</span>
+                    </div>
+                    <!-- Playlist toggle button right after the screen -->
+                    <button class="lcd-list-btn" id="lcdListBtn" title="Toggle Playlist">
+                        <span class="lcd-btn-icon">♫</span>
+                        <span class="lcd-btn-text">LIST</span>
+                    </button>
+                    <div class="signal-leds" id="signalLeds">
+                        <span></span><span></span><span></span><span></span>
+                        <span></span><span></span><span></span><span></span>
+                    </div>
+                </div>
+
+                <!-- Progress bar -->
+                <div class="progress-wrap">
+                    <div class="progress-bar-bg" id="progressBg">
+                        <div class="progress-bar-fill" id="progressFill"></div>
+                    </div>
+                    <div class="progress-time" id="progressTime">0:00</div>
+                </div>
+
+                <!-- Tuner band -->
+                <div class="tuner-band">
+                    <div class="tuner-scale">
+                        <span>88</span><span>92</span><span>96</span>
+                        <span>100</span><span>104</span><span>108</span>
+                    </div>
+                    <div class="tuner-track">
+                        <div class="tuner-fill"></div>
+                        <div class="tuner-indicator" id="tunerIndicator">
+                            <div class="tuner-needle-line"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Preset buttons + LIST button -->
+                <div class="presets-row">
+                    <div class="preset-group-label">PRESETS</div>
+                    <div class="presets-btns">
+                        <button class="preset-btn" data-freq="91.1" data-meta="DARSH CHILL · SUNSET HAZE">
+                            <span class="p-num">1</span><span class="p-freq">91.1</span>
+                        </button>
+                        <button class="preset-btn active" data-freq="98.7" data-meta="DARSH RADIO · MIDNIGHT DREAMS">
+                            <span class="p-num">2</span><span class="p-freq">98.7</span>
+                        </button>
+                        <button class="preset-btn" data-freq="103.5" data-meta="DARSH HITS · ELECTRIC FEEL">
+                            <span class="p-num">3</span><span class="p-freq">103.5</span>
+                        </button>
+                        <button class="preset-btn" data-freq="107.2" data-meta="DARSH DEEP · ABYSSAL">
+                            <span class="p-num">4</span><span class="p-freq">107.2</span>
+                        </button>
+                        <button class="list-btn" id="listBtn">
+                            <span class="p-num">♫</span><span class="p-freq">LIST</span>
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- ── RIGHT PANEL: Knobs + play ── -->
+            <div class="right-panel">
+
+                <!-- Volume knob -->
+                <div class="knob-group">
+                    <div class="knob-label">VOL</div>
+                    <div class="knob-ring">
+                        <div class="knob" id="volKnob">
+                            <div class="knob-marker"></div>
+                            <div class="knob-shine"></div>
+                        </div>
+                    </div>
+                    <div class="knob-ticks">
+                        <span class="tk-l">–</span>
+                        <span class="tk-r">+</span>
+                    </div>
+                </div>
+
+                <div class="panel-divider"></div>
+
+                <!-- Play/Stop button -->
+                <div class="play-group">
+                    <button class="play-button" id="playBtn">
+                        <div class="play-led" id="playLed"></div>
+                        <svg class="icon-play" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M8 5v14l11-7z" />
+                        </svg>
+                        <svg class="icon-stop" viewBox="0 0 24 24" fill="currentColor" style="display:none">
+                            <rect x="5" y="5" width="14" height="14" rx="2" />
+                        </svg>
+                    </button>
+                    <div class="play-label">ON / OFF</div>
+                </div>
+
+                <div class="panel-divider"></div>
+
+                <!-- Tune knob — drag ↑ next · drag ↓ prev -->
+                <div class="knob-group">
+                    <div class="knob-label">TUNE</div>
+                    <div class="knob-ring">
+                        <div class="knob" id="tuneKnob">
+                            <div class="knob-marker"></div>
+                            <div class="knob-shine"></div>
+                        </div>
+                    </div>
+                    <div class="knob-ticks">
+                        <span class="tk-l">◂</span>
+                        <span class="tk-r">▸</span>
+                    </div>
+                </div>
+
+            </div>
+
+        </div><!-- /radio-body -->
+    </div><!-- /scene -->
+
+    <script>
+        // ════════════════════════════════════════════════════════════════════════════
+        // PLAYLIST — All 44 individual songs with direct streaming IDs
+        // ════════════════════════════════════════════════════════════════════════════
+        const PLAYLIST = [
+            { title: "Arz Kiya Hai", artist: "Anuv Jain", yt: "bP8ATWCvqzw" },
+            { title: "Jo Tum Mere Ho", artist: "Anuv Jain", yt: "1K9487uM1u0" },
+            { title: "Husn", artist: "Anuv Jain", yt: "gJLVTKhTnog" },
+            { title: "Finding Her", artist: "Kushagra, Bharath, Saaheal", yt: "P8cT2Hy96SU" },
+            { title: "Paro", artist: "Aditya Rikhari", yt: "F3G8gN-y_Dk" },
+            { title: "Afsos", artist: "Anuv Jain, AP Dhillon", yt: "4fB8f-c3c_Y" },
+            { title: "Haseen", artist: "Talwiinder", yt: "uK48_Jz154I" },
+            { title: "Woh Lamhe Woh Baatein", artist: "Atif Aslam", yt: "5FegZzMj_uA" },
+            { title: "Dooron Dooron", artist: "Paresh Pahuja", yt: "qZ1uB1NQKQY" },
+            { title: "Sahiba", artist: "Aditya Rikhari", yt: "6P6C4Jd9O9w" },
+            { title: "Wishes (Remake)", artist: "Talwiinder", yt: "oE7lU2qj4rY" },
+            { title: "12 Years", artist: "Lucky Rathore", yt: "Tl9JGFRrfIM" },
+            { title: "Khat", artist: "Navjot Ahuja", yt: "BqMNhBWJCbo" },
+            { title: "Jaan Se Guzarte Hain", artist: "Shashwat Sachdev", yt: "hB8KW6Vn9j8" },
+            { title: "Jaiye Sajana", artist: "Shashwat Sachdev", yt: "E8PKTB-jLqE" },
+            { title: "Aaj Se Teri", artist: "Arijit Singh", yt: "L2G349_h49I" },
+            { title: "Teri Teri Yaad", artist: "", yt: "5Fh1VK9Xj5A" },
+            { title: "Yeh Fitoor Mera", artist: "Arijit Singh", yt: "B65H9G10g3k" },
+            { title: "Bairan", artist: "Banjaare", yt: "NZQNfMT7lWs" },
+            { title: "Jugni Kehndiya", artist: "Tochi Raina", yt: "qzLtJu-ZI_0" },
+            { title: "Jhol (Acoustic)", artist: "Maanu, Annural Khalid", yt: "7-GJHPPedpE" },
+            { title: "Safar", artist: "Bayaan", yt: "UJkNQgBCUvQ" },
+            { title: "Koodappirannor", artist: "", yt: "9O7xL6RxnTA" },
+            { title: "Udi Udi", artist: "", yt: "JpvZB7ZFUQE" },
+            { title: "Deewaana Deewaana", artist: "A.R. Rahman", yt: "r7bUPL3P99Q" },
+            { title: "Othayadi Pathayila", artist: "", yt: "lPqmB7MbCVA" },
+            { title: "Paaro", artist: "Aditya Rikhari", yt: "F3G8gN-y_Dk" },
+            { title: "Ehsaas", artist: "Faheem Abdullah", yt: "Q8wHBNAn42A" },
+            { title: "Ishqa Ve", artist: "Zeeshan Ali", yt: "ZLlkl0Oqbv8" },
+            { title: "Teri Deewani", artist: "Kailash Kher", yt: "FH8bTKMcRNQ" },
+            { title: "Darkhaast", artist: "Arijit Singh", yt: "A8-5L1qP-8U" },
+            { title: "Tenu Sang Rakhna", artist: "Arijit Singh", yt: "0k57_u0b3aQ" },
+            { title: "Bulleya", artist: "", yt: "MzFGDIJuRnQ" },
+            { title: "Kun Faya Kun", artist: "A.R. Rahman", yt: "T94PHkCQBCQ" },
+            { title: "Dil To Bachcha Hai", artist: "Rahat Fateh Ali Khan", yt: "yqFDWtFbxPg" },
+            { title: "Raabta", artist: "Arijit Singh", yt: "sS6-P1d5H-g" },
+            { title: "O Rangrez", artist: "Shreya Ghoshal", yt: "W5GBH6YsGWg" },
+            { title: "Kaise Hua", artist: "Vishal Mishra", yt: "Fp8msa5uYsc" },
+            { title: "Tu Chahiye", artist: "Atif Aslam", yt: "zuvla6ABKbs" },
+            { title: "Finding Her (Female)", artist: "", yt: "P8cT2Hy96SU" },
+            { title: "Zindagi Kuch Toh Bata", artist: "Jubin Nautiyal", yt: "3hq9SxcJjuQ" },
+            { title: "Mann Mera", artist: "Gajendra Verma", yt: "F0f5nB4h0r4" },
+            { title: "Tera Ghata", artist: "Gajendra Verma", yt: "K3-a8l2gH6k" },
+            { title: "O Saathi", artist: "Atif Aslam", yt: "7R6FoUE7yM8" },
+        ];
+
+        // ════════════════════════════════════════════════════════════════════════════
+        // STATE
+        // ════════════════════════════════════════════════════════════════════════════
+        let isPlaying = false;
+        let volume = 75;               // 0–100 for audio engine
+        let volAngle = -100 + (volume / 100) * 200;
+        let tuneAngle = 0;
+        let vizRaf = null;
+        let currentIdx = 0;
+        let ytPlayer = null;
+        let ytReady = false;
+        let pendingPlay = false;
+        let trayOpen = false;
+        let progressRaf = null;
+        let isSwitchingTrack = false;
+        let loadTrackTimeout = null;
+
+        // Knob drag state
+        let draggingVol = false, volStartY = 0, volStartAngle = volAngle;
+        let draggingTune = false, tuneStartY = 0, tuneStartAngle = 0;
+        let tuneAccumPx = 0;
+        const PX_PER_TRACK = 30;
+
+        // Station presets (decorative frequency display)
+        const stations = {
+            '91.1': { needle: 0.07 },
+            '98.7': { needle: 0.508 },
+            '103.5': { needle: 0.756 },
+            '107.2': { needle: 0.942 },
+        };
+
+        // ════════════════════════════════════════════════════════════════════════════
+        // DOM REFS
+        // ════════════════════════════════════════════════════════════════════════════
+        const playBtn = document.getElementById('playBtn');
+        const playLed = document.getElementById('playLed');
+        const playIcon = playBtn.querySelector('.icon-play');
+        const stopIcon = playBtn.querySelector('.icon-stop');
+        const lcdFreq = document.getElementById('lcdFreq');
+        const lcdMeta = document.getElementById('lcdMeta');
+        const lcdIdx = document.getElementById('lcdIdx');
+        const tunerIndicator = document.getElementById('tunerIndicator');
+        const signalLeds = document.getElementById('signalLeds');
+        const volKnob = document.getElementById('volKnob');
+        const tuneKnob = document.getElementById('tuneKnob');
+        const progressFill = document.getElementById('progressFill');
+        const progressBg = document.getElementById('progressBg');
+        const progressTime = document.getElementById('progressTime');
+        const playlistTray = document.getElementById('playlistTray');
+        const trayHandle = document.getElementById('trayHandle');
+        const listBtn = document.getElementById('listBtn');
+        const lcdListBtn = document.getElementById('lcdListBtn');
+        const trackList = document.getElementById('trackList');
+
+        // ════════════════════════════════════════════════════════════════════════════
+        // YOUTUBE AUDIO ENGINE
+        // ════════════════════════════════════════════════════════════════════════════
+        function onYouTubeIframeAPIReady() {
+            ytPlayer = new YT.Player('yt-player', {
+                height: '120', width: '200',
+                videoId: PLAYLIST[0].yt,
+                playerVars: {
+                    autoplay: 0,
+                    controls: 0,
+                    rel: 0,
+                    modestbranding: 1,
+                    iv_load_policy: 3,
+                    disablekb: 1,
+                    playsinline: 1,
+                    enablejsapi: 1,
+                },
+                events: {
+                    onReady: onPlayerReady,
+                    onStateChange: onPlayerStateChange,
+                    onError: onPlayerError,
+                }
+            });
+        }
+
+        function onPlayerReady(event) {
+            ytReady = true;
+            event.target.setVolume(volume);
+            if (pendingPlay) {
+                event.target.playVideo();
+                pendingPlay = false;
+            }
+        }
+
+        function onPlayerError(event) {
+            console.warn('Playback error, skipping to next track:', event.data);
+            setTimeout(() => nextTrack(), 200);
+        }
+
+        function onPlayerStateChange(event) {
+            const S = YT.PlayerState;
+            if (event.data === S.PLAYING) {
+                if (!isPlaying) setPlaying(true);
+                startProgress();
+            } else if (event.data === S.ENDED) {
+                // Auto-advance to next track
+                currentIdx = (currentIdx + 1) % PLAYLIST.length;
+                loadAndPlay(currentIdx);
+            } else if (event.data === S.BUFFERING) {
+                if (isPlaying) startViz();
+            } else if (event.data === S.PAUSED) {
+                if (isPlaying && !isSwitchingTrack) {
+                    setPlaying(false);
+                    stopProgress();
+                }
+            }
+        }
+
+        // ════════════════════════════════════════════════════════════════════════════
+        // LOAD AND PLAY INDIVIDUAL TRACK
+        // ════════════════════════════════════════════════════════════════════════════
+        function loadAndPlay(idx) {
+            currentIdx = idx;
+            refreshLCD();
+            flashLCD();
+            highlightTrack(idx);
+            setPlaying(true);
+
+            if (!ytPlayer || !ytReady) {
+                pendingPlay = true;
+                return;
+            }
+
+            isSwitchingTrack = true;
+            if (loadTrackTimeout) clearTimeout(loadTrackTimeout);
+            loadTrackTimeout = setTimeout(() => {
+                try {
+                    ytPlayer.loadVideoById({
+                        videoId: PLAYLIST[idx].yt,
+                        startSeconds: 0
+                    });
+                    ytPlayer.playVideo();
+                } catch (e) {
+                    console.error('Error loading video:', e);
+                } finally {
+                    setTimeout(() => { isSwitchingTrack = false; }, 300);
+                }
+            }, 30);
+        }
+
+        // ════════════════════════════════════════════════════════════════════════════
+        // HELPERS
+        // ════════════════════════════════════════════════════════════════════════════
+        function setKnob(el, deg) { el.style.transform = `rotate(${deg}deg)`; }
+
+        function refreshLCD() {
+            const t = PLAYLIST[currentIdx];
+            lcdMeta.textContent = t.artist ? `${t.title} · ${t.artist}` : t.title;
+            lcdIdx.textContent = `${String(currentIdx + 1).padStart(2, '0')}/44`;
+        }
+
+        function setPlaying(on) {
+            isPlaying = on;
+            playIcon.style.display = on ? 'none' : '';
+            stopIcon.style.display = on ? '' : 'none';
+            on ? playLed.classList.add('on') : playLed.classList.remove('on');
+            on ? signalLeds.classList.add('active') : signalLeds.classList.remove('active');
+            on ? startViz() : stopViz();
+        }
+
+        function flashLCD() {
+            lcdFreq.classList.add('flicker');
+            setTimeout(() => lcdFreq.classList.remove('flicker'), 180);
+        }
+
+        function fmtTime(s) {
+            const m = Math.floor(s / 60);
+            const ss = String(Math.floor(s % 60)).padStart(2, '0');
+            return `${m}:${ss}`;
+        }
+
+        // Progress bar ticker
+        function startProgress() {
+            if (progressRaf) return;
+            (function tick() {
+                if (ytPlayer && ytReady) {
+                    try {
+                        const cur = ytPlayer.getCurrentTime() || 0;
+                        const dur = ytPlayer.getDuration() || 1;
+                        progressFill.style.width = `${(cur / dur) * 100}%`;
+                        progressTime.textContent = fmtTime(cur);
+                    } catch (e) { }
+                }
+                progressRaf = requestAnimationFrame(tick);
+            })();
+        }
+        function stopProgress() {
+            cancelAnimationFrame(progressRaf);
+            progressRaf = null;
+        }
+
+        // Click to seek
+        progressBg.addEventListener('click', e => {
+            if (!ytPlayer || !ytReady) return;
+            const rect = progressBg.getBoundingClientRect();
+            const pct = (e.clientX - rect.left) / rect.width;
+            ytPlayer.seekTo(pct * (ytPlayer.getDuration() || 0), true);
+        });
+
+        // ════════════════════════════════════════════════════════════════════════════
+        // TRACK NAVIGATION
+        // ════════════════════════════════════════════════════════════════════════════
+        function nextTrack() {
+            currentIdx = (currentIdx + 1) % PLAYLIST.length;
+            loadAndPlay(currentIdx);
+        }
+
+        function prevTrack() {
+            currentIdx = (currentIdx - 1 + PLAYLIST.length) % PLAYLIST.length;
+            loadAndPlay(currentIdx);
+        }
+
+        // ════════════════════════════════════════════════════════════════════════════
+        // PLAYLIST LIST BUILDER
+        // ════════════════════════════════════════════════════════════════════════════
+        function buildTrackList() {
+            trackList.innerHTML = '';
+            PLAYLIST.forEach((t, i) => {
+                const item = document.createElement('div');
+                item.className = 'track-item' + (i === currentIdx ? ' active' : '');
+                item.dataset.idx = i;
+                item.innerHTML = `
+            <span class="track-num">${String(i + 1).padStart(2, '0')}</span>
+            <div class="cd-disc"></div>
+            <div class="track-info">
+                <div class="track-title">${t.title}</div>
+                ${t.artist ? `<div class="track-artist">${t.artist}</div>` : ''}
+            </div>
+            <span class="track-play-icon">${i === currentIdx ? '▶' : ''}</span>`;
+                item.addEventListener('click', () => {
+                    loadAndPlay(i);
+                });
+                trackList.appendChild(item);
+            });
+        }
+
+        function highlightTrack(idx) {
+            document.querySelectorAll('.track-item').forEach((el, i) => {
+                el.classList.toggle('active', i === idx);
+                el.querySelector('.track-play-icon').textContent = i === idx ? '▶' : '';
+            });
+            const active = trackList.querySelector('.track-item.active');
+            if (active) active.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+        }
+
+        // ════════════════════════════════════════════════════════════════════════════
+        // PLAY / STOP
+        // ════════════════════════════════════════════════════════════════════════════
+        function play() {
+            setPlaying(true);
+            if (!ytPlayer || !ytReady) {
+                pendingPlay = true;
+                return;
+            }
+            if (ytPlayer.getPlayerState() === YT.PlayerState.PAUSED) {
+                ytPlayer.playVideo();
+            } else {
+                loadAndPlay(currentIdx);
+            }
+        }
+
+        function stop() {
+            setPlaying(false);
+            if (ytPlayer && ytReady) {
+                ytPlayer.pauseVideo();
+            }
+        }
+
+        playBtn.addEventListener('click', () => {
+            playBtn.classList.add('pressed');
+            setTimeout(() => playBtn.classList.remove('pressed'), 150);
+            isPlaying ? stop() : play();
+        });
+
+        // ════════════════════════════════════════════════════════════════════════════
+        // KNOBS
+        // ════════════════════════════════════════════════════════════════════════════
+        setKnob(volKnob, volAngle);
+        setKnob(tuneKnob, tuneAngle);
+
+        // Volume knob
+        volKnob.parentElement.addEventListener('mousedown', e => {
+            draggingVol = true; volStartY = e.clientY; volStartAngle = volAngle;
+            document.body.style.cursor = 'ns-resize';
+        });
+        window.addEventListener('mousemove', e => {
+            if (!draggingVol) return;
+            const delta = (volStartY - e.clientY) * 1.5;
+            volAngle = Math.max(-100, Math.min(100, volStartAngle + delta));
+            volume = Math.round((volAngle + 100) / 2); // 0 - 100
+            setKnob(volKnob, volAngle);
+            if (ytPlayer && ytReady) ytPlayer.setVolume(volume);
+        });
+        window.addEventListener('mouseup', () => {
+            if (draggingVol) { draggingVol = false; document.body.style.cursor = ''; }
+        });
+
+        // Tune knob — drag ↑ = next · drag ↓ = prev
+        tuneKnob.parentElement.addEventListener('mousedown', e => {
+            draggingTune = true; tuneStartY = e.clientY;
+            tuneStartAngle = tuneAngle; tuneAccumPx = 0;
+            document.body.style.cursor = 'ns-resize';
+        });
+        window.addEventListener('mousemove', e => {
+            if (!draggingTune) return;
+            const rawDeltaPx = tuneStartY - e.clientY;
+            tuneAngle = tuneStartAngle + rawDeltaPx * 1.5;
+            setKnob(tuneKnob, tuneAngle);
+
+            // Move needle decoratively
+            const raw = ((tuneAngle % 360) + 360) % 360;
+            tunerIndicator.style.left = `${(raw / 360) * 100}%`;
+            lcdFreq.textContent = (87.5 + (raw / 360) * (108 - 87.5)).toFixed(1);
+
+            // Track step via threshold
+            const steps = Math.floor(rawDeltaPx / PX_PER_TRACK);
+            const needed = steps - Math.round(tuneAccumPx / PX_PER_TRACK);
+            if (needed > 0) { nextTrack(); tuneAccumPx += PX_PER_TRACK; }
+            else if (needed < 0) { prevTrack(); tuneAccumPx -= PX_PER_TRACK; }
+        });
+        window.addEventListener('mouseup', () => {
+            if (draggingTune) { draggingTune = false; document.body.style.cursor = ''; }
+        });
+
+        // ════════════════════════════════════════════════════════════════════════════
+        // PRESET BUTTONS (decorative station-switching)
+        // ════════════════════════════════════════════════════════════════════════════
+        document.querySelectorAll('.preset-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                btn.classList.add('pressed');
+                setTimeout(() => btn.classList.remove('pressed'), 120);
+                document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                const freq = btn.dataset.freq;
+                const s = stations[freq];
+                animateFreq(parseFloat(lcdFreq.textContent), parseFloat(freq));
+                tunerIndicator.style.left = `${s.needle * 100}%`;
+                tuneAngle = s.needle * 360;
+                setKnob(tuneKnob, tuneAngle);
+                flashLCD();
+            });
+        });
+        tunerIndicator.style.left = `${stations['98.7'].needle * 100}%`;
+
+        function animateFreq(from, to) {
+            const dur = 400, start = performance.now();
+            (function step(now) {
+                const t = Math.min((now - start) / dur, 1);
+                const e = 1 - Math.pow(1 - t, 3);
+                lcdFreq.textContent = (from + (to - from) * e).toFixed(1);
+                if (t < 1) requestAnimationFrame(step);
+            })(performance.now());
+        }
+
+        // ════════════════════════════════════════════════════════════════════════════
+        // PLAYLIST TRAY TOGGLE
+        // ════════════════════════════════════════════════════════════════════════════
+        function toggleTray() {
+            trayOpen = !trayOpen;
+            playlistTray.classList.toggle('open', trayOpen);
+            if (listBtn) listBtn.classList.toggle('active', trayOpen);
+            if (lcdListBtn) {
+                lcdListBtn.classList.toggle('active', trayOpen);
+                lcdListBtn.classList.add('pressed');
+                setTimeout(() => lcdListBtn.classList.remove('pressed'), 120);
+            }
+            if (trayOpen) {
+                setTimeout(() => {
+                    const active = trackList.querySelector('.track-item.active');
+                    if (active) active.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+                }, 50);
+            }
+        }
+
+        if (trayHandle) trayHandle.addEventListener('click', toggleTray);
+        if (listBtn) listBtn.addEventListener('click', toggleTray);
+        if (lcdListBtn) lcdListBtn.addEventListener('click', toggleTray);
+
+        // ════════════════════════════════════════════════════════════════════════════
+        // SIGNAL LED VISUALIZER
+        // ════════════════════════════════════════════════════════════════════════════
+        function startViz() {
+            if (vizRaf) return;
+            (function frame() {
+                const leds = document.querySelectorAll('.signal-leds span');
+                const count = leds.length;
+                const t = performance.now() / 1000;
+                const amp = Math.sin(t * 3.1) * 0.35 + Math.sin(t * 7.3) * 0.2 + 0.6;
+                const active = Math.round(amp * count);
+                leds.forEach((s, i) => {
+                    s.classList.toggle('lit', i < active);
+                    s.classList.toggle('peak', i === count - 1 && active === count);
+                });
+                vizRaf = requestAnimationFrame(frame);
+            })();
+        }
+        function stopViz() {
+            cancelAnimationFrame(vizRaf); vizRaf = null;
+            document.querySelectorAll('.signal-leds span').forEach(s => s.classList.remove('lit', 'peak'));
+        }
+
+        // ════════════════════════════════════════════════════════════════════════════
+        // INIT
+        // ════════════════════════════════════════════════════════════════════════════
+        refreshLCD();
+        buildTrackList();
+
+        // Slow ambient background video playback
+        const bgVideo = document.querySelector('.bg-video');
+        if (bgVideo) {
+            bgVideo.playbackRate = 0.35;
+            bgVideo.addEventListener('loadedmetadata', () => { bgVideo.playbackRate = 0.35; });
+            bgVideo.addEventListener('play', () => { bgVideo.playbackRate = 0.35; });
+        }
+
+        document.querySelector('.radio-body').animate([
+            { opacity: 0, transform: 'translateY(40px) scale(0.97)' },
+            { opacity: 1, transform: 'translateY(0) scale(1)' }
+        ], { duration: 700, easing: 'cubic-bezier(0.16,1,0.3,1)', fill: 'forwards' });
+    </script>
+</body>
+
+</html>

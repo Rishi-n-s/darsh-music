@@ -1,0 +1,490 @@
+@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Outfit:wght@400;600;700&display=swap');
+
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+html, body {
+    width: 100%; height: 100%; overflow: hidden;
+    background: #0d0804;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+}
+
+/* ══ Background Video ════════════════════════════════════════════════════ */
+.bg-video {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    min-width: 100%;
+    min-height: 100%;
+    width: auto;
+    height: auto;
+    transform: translate(-50%, -50%);
+    object-fit: cover;
+    z-index: 0;
+    pointer-events: none;
+}
+
+/* ══ Scene ═══════════════════════════════════════════════════════════════ */
+.scene {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    padding: 0 20px 24px;
+}
+
+/* ══ RADIO BODY — warm amber wood-tone with margin and rounded border-radius ════════ */
+.radio-body {
+    position: relative;
+    display: flex;
+    align-items: stretch;
+    width: min(960px, 94vw);
+    height: 156px;
+    border-radius: 18px;
+    opacity: 0;
+
+    /* Warm amber/sienna plastic — matches sunset palette */
+    background:
+        linear-gradient(180deg,
+            #3d2a10 0%,
+            #2e1f0e 40%,
+            #251a0b 100%);
+
+    box-shadow:
+        /* inner top highlight — warm rim light */
+        inset 0 1px 0 rgba(255,180,60,0.22),
+        inset 0 -1px 0 rgba(0,0,0,0.5),
+        /* full floating depth shadows */
+        0 20px 50px rgba(0,0,0,0.7),
+        0 8px 20px rgba(0,0,0,0.5),
+        0 0 0 1px rgba(0,0,0,0.3);
+
+    border: 1px solid rgba(255,160,40,0.2);
+}
+
+/* Subtle wood-grain texture */
+.radio-body::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: repeating-linear-gradient(
+        92deg,
+        transparent 0px, transparent 60px,
+        rgba(255,200,80,0.03) 60px, rgba(255,200,80,0.03) 61px,
+        transparent 61px, transparent 120px
+    ),
+    repeating-linear-gradient(
+        0deg,
+        transparent, transparent 3px,
+        rgba(0,0,0,0.06) 3px, rgba(0,0,0,0.06) 4px
+    );
+    pointer-events: none;
+    z-index: 0;
+}
+
+/* Warm top-edge glow — mimics the sunset light hitting the radio */
+.radio-body::after {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0; height: 2px;
+    border-radius: 18px 18px 0 0;
+    background: linear-gradient(90deg,
+        transparent 0%,
+        rgba(255,160,40,0.35) 20%,
+        rgba(255,200,80,0.55) 50%,
+        rgba(255,160,40,0.35) 80%,
+        transparent 100%);
+}
+
+/* All direct children sit above pseudo-elements */
+.radio-body > * { position: relative; z-index: 1; }
+
+/* ══ ANTENNA ══════════════════════════════════════════════════════════════ */
+.antenna-base {
+    position: absolute;
+    top: -8px; right: 80px;
+    width: 18px; height: 12px;
+    background: linear-gradient(180deg, #6b5030 0%, #4a3520 100%);
+    border-radius: 4px 4px 2px 2px;
+    border: 1px solid rgba(0,0,0,0.4);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,180,60,0.15);
+    display: flex; justify-content: center;
+}
+.antenna-pole {
+    position: absolute; bottom: 8px;
+    width: 3px; height: 100px;
+    background: linear-gradient(180deg,
+        #c89040 0%, #a07030 30%, #c8a050 60%, #906820 100%);
+    border-radius: 2px 2px 0 0;
+    box-shadow: 1px 0 3px rgba(0,0,0,0.5), inset 0 0 4px rgba(255,180,50,0.1);
+    transform-origin: bottom center;
+    transform: rotate(-7deg);
+}
+
+/* ══ SPEAKER PANEL ════════════════════════════════════════════════════════ */
+.speaker-panel {
+    width: 180px; flex-shrink: 0;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    gap: 8px; padding: 14px;
+    border-right: 1px solid rgba(255,140,30,0.1);
+    position: relative;
+}
+.speaker-panel::after {
+    content: '';
+    position: absolute; top: 0; right: -1px; bottom: 0; width: 1px;
+    background: linear-gradient(180deg, transparent, rgba(255,160,40,0.12) 40%, rgba(255,160,40,0.12) 60%, transparent);
+}
+
+/* Grille — warm brown mesh */
+.speaker-grille {
+    width: 120px; height: 90px;
+    border-radius: 6px;
+    background:
+        radial-gradient(circle, rgba(0,0,0,0.55) 1.3px, transparent 1.3px),
+        #1a1108;
+    background-size: 7px 7px;
+    box-shadow:
+        inset 0 3px 10px rgba(0,0,0,0.7),
+        inset 0 0 0 1px rgba(0,0,0,0.6),
+        0 1px 0 rgba(255,160,40,0.1);
+    border: 1px solid rgba(0,0,0,0.5);
+    position: relative; overflow: hidden;
+}
+.speaker-grille::before {
+    content: '';
+    position: absolute; inset: 12px; border-radius: 50%;
+    background: radial-gradient(ellipse 55% 45% at 40% 38%,
+        rgba(255,160,40,0.06) 0%, transparent 70%);
+}
+
+.speaker-logo { text-align: center; }
+.logo-text {
+    display: block; font-family: 'Outfit', sans-serif;
+    font-size: 12px; font-weight: 700; letter-spacing: 0.28em;
+    color: rgba(255,180,60,0.7);
+    text-shadow: 0 0 12px rgba(255,140,20,0.4), 0 1px 0 rgba(0,0,0,0.5);
+}
+.logo-sub {
+    display: block; font-family: 'Share Tech Mono', monospace;
+    font-size: 9px; letter-spacing: 0.14em;
+    color: rgba(200,130,40,0.6); margin-top: 2px;
+}
+
+/* ══ CENTER PANEL ════════════════════════════════════════════════════════ */
+.center-panel {
+    flex: 1;
+    display: flex; flex-direction: column;
+    justify-content: center;
+    gap: 10px; padding: 12px 18px;
+}
+
+/* LCD shell — inset dark recess */
+.lcd-shell {
+    display: flex; align-items: center; gap: 12px;
+    background: linear-gradient(180deg, #120c04 0%, #0e0904 100%);
+    border-radius: 6px;
+    border: 1px solid rgba(0,0,0,0.7);
+    padding: 7px 11px;
+    box-shadow:
+        inset 0 3px 10px rgba(0,0,0,0.9),
+        inset 0 0 0 1px rgba(0,0,0,0.6),
+        0 1px 0 rgba(255,160,40,0.1);
+}
+
+/* LCD screen — amber/orange tint to match sunset */
+.lcd-screen {
+    flex: 1;
+    background: linear-gradient(160deg, #0d0800 0%, #100a00 100%);
+    border-radius: 4px;
+    border: 1px solid rgba(0,0,0,0.9);
+    box-shadow:
+        inset 0 1px 6px rgba(0,0,0,0.9),
+        inset 0 0 0 1px rgba(0,0,0,0.7),
+        0 0 10px rgba(255,140,20,0.08);
+    padding: 6px 10px;
+    position: relative; overflow: hidden;
+}
+.lcd-screen::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: repeating-linear-gradient(
+        0deg, transparent, transparent 1px,
+        rgba(0,0,0,0.15) 1px, rgba(0,0,0,0.15) 2px
+    );
+    pointer-events: none;
+}
+.lcd-screen::after {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0; height: 40%;
+    background: linear-gradient(180deg, rgba(255,160,40,0.04) 0%, transparent 100%);
+    border-radius: 4px 4px 0 0;
+    pointer-events: none;
+}
+
+.lcd-row { display: flex; align-items: baseline; gap: 6px; line-height: 1; }
+.lcd-band {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px; letter-spacing: 0.1em;
+    color: rgba(255,160,40,0.55);
+}
+.lcd-freq {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 34px; letter-spacing: 0.04em; line-height: 1;
+    color: #ffb030;
+    text-shadow: 0 0 10px rgba(255,160,30,0.95), 0 0 22px rgba(255,120,0,0.5);
+    transition: opacity 0.05s;
+}
+.lcd-freq.flicker { opacity: 0.12; }
+.lcd-mhz {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px; color: rgba(255,160,40,0.45); letter-spacing: 0.08em;
+}
+.lcd-meta {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 9px; color: rgba(220,130,30,0.5);
+    letter-spacing: 0.1em; margin-top: 4px;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+
+/* Signal LEDs — amber/orange theme */
+.signal-leds {
+    display: flex; flex-direction: column;
+    gap: 3px; align-items: center;
+}
+.signal-leds span {
+    width: 8px; height: 5px; border-radius: 2px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(0,0,0,0.6);
+    box-shadow: inset 0 1px 2px rgba(0,0,0,0.7);
+    transition: background 0.1s, box-shadow 0.1s;
+}
+.signal-leds span.lit {
+    background: #e8821a;
+    box-shadow: 0 0 5px rgba(230,120,20,0.9), 0 0 10px rgba(200,80,0,0.4);
+    border-color: rgba(220,120,20,0.4);
+}
+.signal-leds span.peak {
+    background: #ff3322;
+    box-shadow: 0 0 6px rgba(255,50,30,0.9), 0 0 14px rgba(200,20,10,0.5);
+    border-color: rgba(255,70,40,0.5);
+}
+
+/* Tuner band */
+.tuner-band { position: relative; }
+.tuner-scale { display: flex; justify-content: space-between; margin-bottom: 4px; }
+.tuner-scale span {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 9px; color: rgba(200,140,50,0.4);
+}
+.tuner-track {
+    position: relative; height: 7px; border-radius: 4px;
+    background: linear-gradient(180deg, #0a0601 0%, #140c03 100%);
+    border: 1px solid rgba(0,0,0,0.6);
+    box-shadow: inset 0 2px 6px rgba(0,0,0,0.8);
+    overflow: visible;
+}
+.tuner-fill {
+    position: absolute; inset: 1px; border-radius: 3px;
+    background: linear-gradient(90deg,
+        rgba(255,140,20,0.12) 0%,
+        rgba(255,180,40,0.2) 50%,
+        rgba(220,120,10,0.1) 100%);
+}
+.tuner-indicator {
+    position: absolute; top: 50%;
+    transform: translate(-50%, -50%);
+    display: flex; flex-direction: column; align-items: center;
+    transition: left 0.5s cubic-bezier(0.16,1,0.3,1);
+}
+.tuner-needle-line {
+    width: 2px; height: 18px;
+    background: linear-gradient(180deg, #ffcc44, #ff9900);
+    border-radius: 1px;
+    box-shadow: 0 0 6px rgba(255,180,30,0.9), 0 0 14px rgba(255,120,0,0.5);
+}
+
+/* Presets */
+.presets-row { display: flex; align-items: center; gap: 10px; }
+.preset-group-label {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 8px; letter-spacing: 0.2em;
+    color: rgba(200,140,50,0.35); flex-shrink: 0;
+}
+.presets-btns { display: flex; gap: 6px; }
+
+/* Physical push buttons — aged Bakelite style */
+.preset-btn {
+    font-family: 'Share Tech Mono', monospace;
+    cursor: pointer; border-radius: 4px;
+    padding: 5px 10px;
+    display: flex; flex-direction: column; align-items: center;
+    gap: 1px; position: relative; user-select: none;
+    transition: transform 0.08s ease, box-shadow 0.08s ease;
+    background: linear-gradient(180deg, #4a3318 0%, #3a2812 55%, #2e2010 100%);
+    border: 1px solid rgba(0,0,0,0.5);
+    box-shadow:
+        0 3px 0 rgba(0,0,0,0.5),
+        0 4px 8px rgba(0,0,0,0.4),
+        inset 0 1px 0 rgba(255,180,60,0.1);
+    color: rgba(200,150,60,0.6);
+}
+.preset-btn:hover {
+    color: rgba(255,190,80,0.9);
+    box-shadow:
+        0 3px 0 rgba(0,0,0,0.5),
+        0 5px 10px rgba(0,0,0,0.45),
+        inset 0 1px 0 rgba(255,180,60,0.15);
+}
+.preset-btn.pressed, .preset-btn:active {
+    transform: translateY(2px);
+    box-shadow:
+        0 1px 0 rgba(0,0,0,0.5),
+        0 2px 4px rgba(0,0,0,0.4),
+        inset 0 2px 5px rgba(0,0,0,0.5);
+}
+.preset-btn.active {
+    background: linear-gradient(180deg, #5a3a08 0%, #402808 55%, #301e06 100%);
+    color: #ffb830;
+    box-shadow:
+        0 3px 0 rgba(0,0,0,0.5),
+        0 4px 8px rgba(0,0,0,0.4),
+        inset 0 1px 0 rgba(255,200,60,0.18),
+        0 0 10px rgba(220,140,20,0.18);
+    border-color: rgba(180,110,20,0.4);
+}
+.p-num { font-size: 8px; opacity: 0.45; letter-spacing: 0.05em; }
+.p-freq { font-size: 11px; font-weight: bold; letter-spacing: 0.04em; }
+
+/* ══ RIGHT PANEL ══════════════════════════════════════════════════════════ */
+.right-panel {
+    display: flex; align-items: center;
+    gap: 18px; padding: 0 22px;
+    border-left: 1px solid rgba(255,140,30,0.1);
+    position: relative;
+}
+.right-panel::before {
+    content: '';
+    position: absolute; top: 0; left: -1px; bottom: 0; width: 1px;
+    background: linear-gradient(180deg, transparent, rgba(255,160,40,0.08) 40%, rgba(255,160,40,0.08) 60%, transparent);
+}
+
+.panel-divider {
+    width: 1px; height: 55px;
+    background: linear-gradient(180deg, transparent, rgba(255,140,30,0.15), transparent);
+}
+
+/* Knob group */
+.knob-group { display: flex; flex-direction: column; align-items: center; gap: 5px; }
+.knob-label {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 9px; letter-spacing: 0.2em;
+    color: rgba(200,140,50,0.5);
+}
+
+/* Chrome/brass knob ring */
+.knob-ring {
+    width: 56px; height: 56px; border-radius: 50%;
+    background: linear-gradient(145deg, #c89040 0%, #7a5820 35%, #b07830 60%, #e0a850 100%);
+    box-shadow:
+        0 4px 14px rgba(0,0,0,0.6),
+        0 2px 5px rgba(0,0,0,0.5),
+        inset 0 1px 0 rgba(255,220,100,0.5),
+        inset 0 -1px 0 rgba(0,0,0,0.4);
+    display: flex; align-items: center; justify-content: center;
+    cursor: ns-resize;
+}
+.knob {
+    width: 44px; height: 44px; border-radius: 50%;
+    position: relative;
+    background:
+        radial-gradient(ellipse 60% 40% at 36% 30%,
+            rgba(255,200,80,0.15) 0%, transparent 60%),
+        linear-gradient(145deg, #2a1e0a 0%, #180e02 100%);
+    box-shadow:
+        inset 0 2px 6px rgba(0,0,0,0.8),
+        inset 0 -1px 2px rgba(255,160,30,0.06),
+        0 2px 4px rgba(0,0,0,0.5);
+    transition: transform 0s;
+}
+.knob::before {
+    content: '';
+    position: absolute; inset: 3px; border-radius: 50%;
+    background: repeating-conic-gradient(
+        rgba(255,160,40,0.04) 0deg 9deg,
+        transparent 9deg 18deg
+    );
+}
+.knob-marker {
+    position: absolute; top: 5px; left: 50%;
+    width: 3px; height: 8px;
+    background: linear-gradient(180deg, #ffcc44, #ff9900);
+    border-radius: 2px;
+    transform: translateX(-50%);
+    box-shadow: 0 0 5px rgba(255,180,30,0.8);
+}
+.knob-shine {
+    position: absolute; top: 8px; left: 9px;
+    width: 12px; height: 7px; border-radius: 50%;
+    background: rgba(255,210,100,0.1);
+    transform: rotate(-30deg);
+    pointer-events: none;
+}
+.knob-ticks { display: flex; justify-content: space-between; width: 50px; }
+.tk-l, .tk-r {
+    font-size: 10px; color: rgba(200,140,50,0.35);
+    font-family: 'Share Tech Mono', monospace;
+}
+
+/* Play button — deep warm red */
+.play-group { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.play-button {
+    width: 50px; height: 50px; border-radius: 8px;
+    cursor: pointer; position: relative;
+    display: flex; align-items: center; justify-content: center;
+    color: rgba(255,200,100,0.85);
+    transition: transform 0.08s ease, box-shadow 0.08s ease;
+    background: linear-gradient(180deg, #5a1a08 0%, #3e1006 50%, #2e0c04 100%);
+    border: 1px solid rgba(0,0,0,0.6);
+    box-shadow:
+        0 4px 0 rgba(0,0,0,0.6),
+        0 6px 12px rgba(0,0,0,0.5),
+        inset 0 1px 0 rgba(255,120,50,0.14);
+}
+.play-button:hover {
+    box-shadow:
+        0 4px 0 rgba(0,0,0,0.6),
+        0 8px 16px rgba(0,0,0,0.55),
+        inset 0 1px 0 rgba(255,120,50,0.2),
+        0 0 18px rgba(220,80,20,0.14);
+}
+.play-button.pressed, .play-button:active {
+    transform: translateY(3px);
+    box-shadow:
+        0 1px 0 rgba(0,0,0,0.6),
+        0 2px 6px rgba(0,0,0,0.5),
+        inset 0 3px 6px rgba(0,0,0,0.6);
+}
+.play-button svg { width: 22px; height: 22px; }
+
+/* LED */
+.play-led {
+    position: absolute; top: 7px; right: 7px;
+    width: 7px; height: 7px; border-radius: 50%;
+    background: rgba(0,0,0,0.5);
+    border: 1px solid rgba(0,0,0,0.6);
+    box-shadow: inset 0 1px 2px rgba(0,0,0,0.7);
+    transition: background 0.3s, box-shadow 0.3s;
+}
+.play-led.on {
+    background: #ff6620;
+    box-shadow: 0 0 5px rgba(255,100,30,0.95), 0 0 14px rgba(220,60,0,0.55);
+    animation: ledPulse 1.4s ease-in-out infinite;
+}
+@keyframes ledPulse {
+    0%,100% { opacity: 1; }
+    50%      { opacity: 0.45; }
+}
+.play-label {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 8px; letter-spacing: 0.15em;
+    color: rgba(200,140,50,0.4);
+}
