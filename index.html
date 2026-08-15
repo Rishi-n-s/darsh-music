@@ -4,8 +4,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Darsh Radio</title>
+    <title>DARSH FM — Retro FM Music Player</title>
+    <meta name="description" content="DARSH FM — A retro skeuomorphic FM radio player featuring curated indie tracks.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Outfit:wght@400;600;700&display=swap"
         rel="stylesheet">
     <link rel="stylesheet" href="style.css">
@@ -18,7 +20,7 @@
             right: 0;
             width: 200px;
             height: 120px;
-            opacity: 0.001; /* Active on-screen so browser never throttles streaming */
+            opacity: 0.001; /* Active on-screen layer so browser media engine never throttles */
             pointer-events: none;
             z-index: -10;
         }
@@ -29,7 +31,8 @@
             bottom: 180px;
             left: 50%;
             transform: translateX(-50%) translateY(calc(100% - 32px));
-            width: min(480px, 96vw);
+            width: min(480px, 94vw);
+            max-width: calc(100vw - 20px);
             z-index: 10;
             transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1);
             display: flex;
@@ -51,7 +54,8 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 7px 16px;
+            padding: 8px 16px;
+            min-height: 34px;
             background: linear-gradient(180deg, #3d2a10 0%, #2a1d09 100%);
             border: 1px solid rgba(255, 160, 40, 0.25);
             border-bottom: none;
@@ -64,11 +68,14 @@
             user-select: none;
             box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.3);
             transition: color 0.2s, background 0.2s;
+            touch-action: manipulation;
         }
 
-        .tray-handle:hover {
+        .tray-handle:hover,
+        .tray-handle:focus-visible {
             color: rgba(255, 190, 60, 1);
             background: linear-gradient(180deg, #483214 0%, #32230b 100%);
+            outline: none;
         }
 
         .tray-arrow {
@@ -89,6 +96,7 @@
             border-top: none;
             border-radius: 0;
             box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
+            -webkit-overflow-scrolling: touch;
         }
 
         .tray-body::-webkit-scrollbar {
@@ -108,25 +116,30 @@
             display: flex;
             align-items: center;
             gap: 10px;
-            padding: 8px 14px;
+            padding: 9px 14px;
+            min-height: 44px; /* Touch target size */
             cursor: pointer;
             border-bottom: 1px solid rgba(255, 160, 40, 0.06);
             transition: background 0.15s;
+            user-select: none;
+            touch-action: manipulation;
         }
 
-        .track-item:hover {
-            background: rgba(255, 160, 40, 0.06);
+        .track-item:hover,
+        .track-item:focus-visible {
+            background: rgba(255, 160, 40, 0.08);
+            outline: none;
         }
 
         .track-item.active {
-            background: rgba(255, 160, 40, 0.1);
-            border-left: 2px solid rgba(255, 160, 40, 0.5);
+            background: rgba(255, 160, 40, 0.12);
+            border-left: 3px solid rgba(255, 160, 40, 0.65);
         }
 
         .track-num {
             font-family: 'Share Tech Mono', monospace;
             font-size: 9px;
-            color: rgba(200, 130, 40, 0.4);
+            color: rgba(200, 130, 40, 0.45);
             width: 22px;
             flex-shrink: 0;
         }
@@ -139,7 +152,7 @@
         .track-title {
             font-family: 'Share Tech Mono', monospace;
             font-size: 11px;
-            color: rgba(255, 180, 60, 0.8);
+            color: rgba(255, 180, 60, 0.85);
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
@@ -148,7 +161,7 @@
         .track-artist {
             font-family: 'Share Tech Mono', monospace;
             font-size: 9px;
-            color: rgba(180, 120, 40, 0.5);
+            color: rgba(180, 120, 40, 0.55);
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
@@ -159,6 +172,8 @@
             font-size: 10px;
             color: rgba(255, 160, 40, 0.5);
             flex-shrink: 0;
+            width: 14px;
+            text-align: center;
         }
 
         .track-item.active .track-play-icon {
@@ -190,7 +205,6 @@
             transition: opacity 0.2s;
         }
 
-        /* Center hole */
         .cd-disc::before {
             content: '';
             position: absolute;
@@ -205,7 +219,6 @@
             box-shadow: 0 0 3px rgba(255, 140, 20, 0.3);
         }
 
-        /* Glare highlight on CD */
         .cd-disc::after {
             content: '';
             position: absolute;
@@ -219,7 +232,6 @@
             pointer-events: none;
         }
 
-        /* Spin only the active/playing track */
         .track-item.active .cd-disc {
             animation: cdSpin 3s linear infinite;
             box-shadow:
@@ -229,13 +241,8 @@
         }
 
         @keyframes cdSpin {
-            from {
-                transform: rotate(0deg);
-            }
-
-            to {
-                transform: rotate(360deg);
-            }
+            from { transform: rotate(0deg); }
+            to   { transform: rotate(360deg); }
         }
 
         /* LCD List button placed right after the LCD display */
@@ -245,6 +252,7 @@
             border-radius: 6px;
             margin: 0 4px 0 8px;
             padding: 6px 10px;
+            min-height: 38px;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -260,15 +268,18 @@
                 inset 0 1px 0 rgba(255, 180, 60, 0.2);
             color: rgba(255, 180, 60, 0.85);
             transition: transform 0.08s ease, box-shadow 0.08s ease, color 0.2s, background 0.2s, border-color 0.2s;
+            touch-action: manipulation;
         }
 
-        .lcd-list-btn:hover {
+        .lcd-list-btn:hover,
+        .lcd-list-btn:focus-visible {
             color: #ffb830;
             border-color: rgba(255, 180, 40, 0.6);
             box-shadow:
                 0 2px 0 rgba(0, 0, 0, 0.6),
                 0 0 10px rgba(255, 160, 40, 0.3),
                 inset 0 1px 0 rgba(255, 200, 80, 0.3);
+            outline: none;
         }
 
         .lcd-list-btn.pressed,
@@ -308,6 +319,7 @@
             cursor: pointer;
             border-radius: 4px;
             padding: 5px 10px;
+            min-height: 38px;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -319,10 +331,13 @@
             box-shadow: 0 3px 0 rgba(0, 0, 0, 0.5), 0 4px 8px rgba(0, 0, 0, 0.4),
                 inset 0 1px 0 rgba(255, 180, 60, 0.12);
             color: rgba(255, 160, 40, 0.75);
+            touch-action: manipulation;
         }
 
-        .list-btn:hover {
+        .list-btn:hover,
+        .list-btn:focus-visible {
             color: rgba(255, 200, 80, 1);
+            outline: none;
         }
 
         .list-btn:active {
@@ -343,7 +358,7 @@
             right: 8px;
             font-family: 'Share Tech Mono', monospace;
             font-size: 9px;
-            color: rgba(255, 160, 40, 0.35);
+            color: rgba(255, 160, 40, 0.4);
             letter-spacing: 0.06em;
         }
 
@@ -353,32 +368,34 @@
             align-items: center;
             gap: 8px;
             padding: 0 2px;
+            user-select: none;
         }
 
         .progress-bar-bg {
             flex: 1;
-            height: 3px;
-            border-radius: 2px;
+            height: 6px;
+            border-radius: 3px;
             background: rgba(255, 160, 40, 0.12);
             cursor: pointer;
             position: relative;
+            touch-action: none;
         }
 
         .progress-bar-fill {
             height: 100%;
-            border-radius: 2px;
+            border-radius: 3px;
             background: linear-gradient(90deg, #c87020, #ffb030);
             width: 0%;
-            transition: width 0.3s linear;
+            transition: width 0.2s linear;
             pointer-events: none;
         }
 
         .progress-time {
             font-family: 'Share Tech Mono', monospace;
-            font-size: 8px;
-            color: rgba(200, 140, 50, 0.4);
+            font-size: 9px;
+            color: rgba(200, 140, 50, 0.5);
             flex-shrink: 0;
-            width: 34px;
+            width: 36px;
             text-align: right;
         }
     </style>
@@ -387,12 +404,12 @@
 <body>
 
     <!-- ══ Background Video Loop ══ -->
-    <video class="bg-video" autoplay muted loop playsinline poster="./bg.png">
+    <video class="bg-video" autoplay muted loop playsinline poster="./bg.png" aria-hidden="true">
         <source src="./make_a_loop_video_of_this_imag.mp4" type="video/mp4">
     </video>
 
     <!-- Hidden Audio Player Engine -->
-    <div id="yt-player-wrap">
+    <div id="yt-player-wrap" aria-hidden="true">
         <div id="yt-player"></div>
     </div>
 
@@ -400,26 +417,26 @@
     <script src="https://www.youtube.com/iframe_api"></script>
 
     <!-- ── Retro Playlist Tray ── -->
-    <div class="playlist-tray" id="playlistTray">
-        <div class="tray-handle" id="trayHandle">
+    <div class="playlist-tray" id="playlistTray" role="region" aria-label="Song Playlist">
+        <div class="tray-handle" id="trayHandle" role="button" tabindex="0" aria-label="Toggle Playlist Tray" aria-expanded="false">
             <span>♫ &nbsp;PLAYLIST &nbsp;·&nbsp; 44 TRACKS</span>
-            <span class="tray-arrow">▲</span>
+            <span class="tray-arrow" aria-hidden="true">▲</span>
         </div>
-        <div class="tray-body" id="trackList"></div>
+        <div class="tray-body" id="trackList" role="list"></div>
     </div>
 
     <div class="scene">
 
         <!-- ══ RADIO BODY ══════════════════════════════════════════════════ -->
-        <div class="radio-body">
+        <main class="radio-body" role="region" aria-label="DARSH FM Radio Player">
 
             <!-- Antenna -->
-            <div class="antenna-base">
+            <div class="antenna-base" aria-hidden="true">
                 <div class="antenna-pole"></div>
             </div>
 
             <!-- ── SPEAKER (left) ── -->
-            <div class="speaker-panel">
+            <div class="speaker-panel" aria-hidden="true">
                 <div class="speaker-grille"></div>
                 <div class="speaker-logo">
                     <span class="logo-text">DARSH</span>
@@ -432,21 +449,21 @@
 
                 <!-- LCD frequency display -->
                 <div class="lcd-shell">
-                    <div class="lcd-screen">
+                    <div class="lcd-screen" role="status" aria-live="polite">
                         <div class="lcd-row">
                             <span class="lcd-band">FM</span>
                             <span class="lcd-freq" id="lcdFreq">98.7</span>
                             <span class="lcd-mhz">MHz</span>
                         </div>
-                        <div class="lcd-meta" id="lcdMeta">DARSH RADIO · TUNE IN TO PLAY</div>
+                        <div class="lcd-meta" id="lcdMeta">DARSH RADIO · READY TO PLAY</div>
                         <span class="lcd-track-idx" id="lcdIdx">01/44</span>
                     </div>
                     <!-- Playlist toggle button right after the screen -->
-                    <button class="lcd-list-btn" id="lcdListBtn" title="Toggle Playlist">
-                        <span class="lcd-btn-icon">♫</span>
+                    <button class="lcd-list-btn" id="lcdListBtn" title="Toggle Playlist" aria-label="Toggle Playlist Drawer">
+                        <span class="lcd-btn-icon" aria-hidden="true">♫</span>
                         <span class="lcd-btn-text">LIST</span>
                     </button>
-                    <div class="signal-leds" id="signalLeds">
+                    <div class="signal-leds" id="signalLeds" aria-hidden="true">
                         <span></span><span></span><span></span><span></span>
                         <span></span><span></span><span></span><span></span>
                     </div>
@@ -454,14 +471,14 @@
 
                 <!-- Progress bar -->
                 <div class="progress-wrap">
-                    <div class="progress-bar-bg" id="progressBg">
+                    <div class="progress-bar-bg" id="progressBg" role="slider" aria-label="Playback Position" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" tabindex="0">
                         <div class="progress-bar-fill" id="progressFill"></div>
                     </div>
-                    <div class="progress-time" id="progressTime">0:00</div>
+                    <div class="progress-time" id="progressTime" aria-label="Current Playback Time">0:00</div>
                 </div>
 
                 <!-- Tuner band -->
-                <div class="tuner-band">
+                <div class="tuner-band" aria-hidden="true">
                     <div class="tuner-scale">
                         <span>88</span><span>92</span><span>96</span>
                         <span>100</span><span>104</span><span>108</span>
@@ -475,22 +492,22 @@
                 </div>
 
                 <!-- Preset buttons + LIST button -->
-                <div class="presets-row">
-                    <div class="preset-group-label">PRESETS</div>
+                <div class="presets-row" role="group" aria-label="Station Presets">
+                    <div class="preset-group-label" aria-hidden="true">PRESETS</div>
                     <div class="presets-btns">
-                        <button class="preset-btn" data-freq="91.1" data-meta="DARSH CHILL · SUNSET HAZE">
+                        <button class="preset-btn" data-freq="91.1" data-meta="DARSH CHILL · SUNSET HAZE" aria-label="Preset 1: 91.1 MHz">
                             <span class="p-num">1</span><span class="p-freq">91.1</span>
                         </button>
-                        <button class="preset-btn active" data-freq="98.7" data-meta="DARSH RADIO · MIDNIGHT DREAMS">
+                        <button class="preset-btn active" data-freq="98.7" data-meta="DARSH RADIO · MIDNIGHT DREAMS" aria-label="Preset 2: 98.7 MHz">
                             <span class="p-num">2</span><span class="p-freq">98.7</span>
                         </button>
-                        <button class="preset-btn" data-freq="103.5" data-meta="DARSH HITS · ELECTRIC FEEL">
+                        <button class="preset-btn" data-freq="103.5" data-meta="DARSH HITS · ELECTRIC FEEL" aria-label="Preset 3: 103.5 MHz">
                             <span class="p-num">3</span><span class="p-freq">103.5</span>
                         </button>
-                        <button class="preset-btn" data-freq="107.2" data-meta="DARSH DEEP · ABYSSAL">
+                        <button class="preset-btn" data-freq="107.2" data-meta="DARSH DEEP · ABYSSAL" aria-label="Preset 4: 107.2 MHz">
                             <span class="p-num">4</span><span class="p-freq">107.2</span>
                         </button>
-                        <button class="list-btn" id="listBtn">
+                        <button class="list-btn" id="listBtn" aria-label="Open Playlist">
                             <span class="p-num">♫</span><span class="p-freq">LIST</span>
                         </button>
                     </div>
@@ -503,47 +520,47 @@
 
                 <!-- Volume knob -->
                 <div class="knob-group">
-                    <div class="knob-label">VOL</div>
-                    <div class="knob-ring">
+                    <div class="knob-label" id="volLabel">VOL</div>
+                    <div class="knob-ring" role="slider" aria-labelledby="volLabel" aria-valuemin="0" aria-valuemax="100" aria-valuenow="75" tabindex="0">
                         <div class="knob" id="volKnob">
                             <div class="knob-marker"></div>
                             <div class="knob-shine"></div>
                         </div>
                     </div>
-                    <div class="knob-ticks">
+                    <div class="knob-ticks" aria-hidden="true">
                         <span class="tk-l">–</span>
                         <span class="tk-r">+</span>
                     </div>
                 </div>
 
-                <div class="panel-divider"></div>
+                <div class="panel-divider" aria-hidden="true"></div>
 
                 <!-- Play/Stop button -->
                 <div class="play-group">
-                    <button class="play-button" id="playBtn">
-                        <div class="play-led" id="playLed"></div>
-                        <svg class="icon-play" viewBox="0 0 24 24" fill="currentColor">
+                    <button class="play-button" id="playBtn" aria-label="Play Track" aria-pressed="false">
+                        <div class="play-led" id="playLed" aria-hidden="true"></div>
+                        <svg class="icon-play" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                             <path d="M8 5v14l11-7z" />
                         </svg>
-                        <svg class="icon-stop" viewBox="0 0 24 24" fill="currentColor" style="display:none">
+                        <svg class="icon-stop" viewBox="0 0 24 24" fill="currentColor" style="display:none" aria-hidden="true">
                             <rect x="5" y="5" width="14" height="14" rx="2" />
                         </svg>
                     </button>
-                    <div class="play-label">ON / OFF</div>
+                    <div class="play-label" aria-hidden="true">ON / OFF</div>
                 </div>
 
-                <div class="panel-divider"></div>
+                <div class="panel-divider" aria-hidden="true"></div>
 
                 <!-- Tune knob — drag ↑ next · drag ↓ prev -->
                 <div class="knob-group">
-                    <div class="knob-label">TUNE</div>
-                    <div class="knob-ring">
+                    <div class="knob-label" id="tuneLabel">TUNE</div>
+                    <div class="knob-ring" role="slider" aria-labelledby="tuneLabel" aria-valuemin="1" aria-valuemax="44" aria-valuenow="1" tabindex="0">
                         <div class="knob" id="tuneKnob">
                             <div class="knob-marker"></div>
                             <div class="knob-shine"></div>
                         </div>
                     </div>
-                    <div class="knob-ticks">
+                    <div class="knob-ticks" aria-hidden="true">
                         <span class="tk-l">◂</span>
                         <span class="tk-r">▸</span>
                     </div>
@@ -551,121 +568,128 @@
 
             </div>
 
-        </div><!-- /radio-body -->
+        </main><!-- /radio-body -->
     </div><!-- /scene -->
 
     <script>
         // ════════════════════════════════════════════════════════════════════════════
-        // PLAYLIST — All 44 individual songs with direct streaming IDs
+        // PLAYLIST DATA — Complete 44-track verified metadata and direct audio sources
         // ════════════════════════════════════════════════════════════════════════════
         const PLAYLIST = [
-            { title: "Arz Kiya Hai", artist: "Anuv Jain", yt: "bP8ATWCvqzw" },
-            { title: "Jo Tum Mere Ho", artist: "Anuv Jain", yt: "1K9487uM1u0" },
-            { title: "Husn", artist: "Anuv Jain", yt: "gJLVTKhTnog" },
-            { title: "Finding Her", artist: "Kushagra, Bharath, Saaheal", yt: "P8cT2Hy96SU" },
-            { title: "Paro", artist: "Aditya Rikhari", yt: "F3G8gN-y_Dk" },
-            { title: "Afsos", artist: "Anuv Jain, AP Dhillon", yt: "4fB8f-c3c_Y" },
-            { title: "Haseen", artist: "Talwiinder", yt: "uK48_Jz154I" },
-            { title: "Woh Lamhe Woh Baatein", artist: "Atif Aslam", yt: "5FegZzMj_uA" },
-            { title: "Dooron Dooron", artist: "Paresh Pahuja", yt: "qZ1uB1NQKQY" },
-            { title: "Sahiba", artist: "Aditya Rikhari", yt: "6P6C4Jd9O9w" },
-            { title: "Wishes (Remake)", artist: "Talwiinder", yt: "oE7lU2qj4rY" },
-            { title: "12 Years", artist: "Lucky Rathore", yt: "Tl9JGFRrfIM" },
-            { title: "Khat", artist: "Navjot Ahuja", yt: "BqMNhBWJCbo" },
-            { title: "Jaan Se Guzarte Hain", artist: "Shashwat Sachdev", yt: "hB8KW6Vn9j8" },
-            { title: "Jaiye Sajana", artist: "Shashwat Sachdev", yt: "E8PKTB-jLqE" },
-            { title: "Aaj Se Teri", artist: "Arijit Singh", yt: "L2G349_h49I" },
-            { title: "Teri Teri Yaad", artist: "", yt: "5Fh1VK9Xj5A" },
-            { title: "Yeh Fitoor Mera", artist: "Arijit Singh", yt: "B65H9G10g3k" },
-            { title: "Bairan", artist: "Banjaare", yt: "NZQNfMT7lWs" },
-            { title: "Jugni Kehndiya", artist: "Tochi Raina", yt: "qzLtJu-ZI_0" },
-            { title: "Jhol (Acoustic)", artist: "Maanu, Annural Khalid", yt: "7-GJHPPedpE" },
-            { title: "Safar", artist: "Bayaan", yt: "UJkNQgBCUvQ" },
-            { title: "Koodappirannor", artist: "", yt: "9O7xL6RxnTA" },
-            { title: "Udi Udi", artist: "", yt: "JpvZB7ZFUQE" },
-            { title: "Deewaana Deewaana", artist: "A.R. Rahman", yt: "r7bUPL3P99Q" },
-            { title: "Othayadi Pathayila", artist: "", yt: "lPqmB7MbCVA" },
-            { title: "Paaro", artist: "Aditya Rikhari", yt: "F3G8gN-y_Dk" },
-            { title: "Ehsaas", artist: "Faheem Abdullah", yt: "Q8wHBNAn42A" },
-            { title: "Ishqa Ve", artist: "Zeeshan Ali", yt: "ZLlkl0Oqbv8" },
-            { title: "Teri Deewani", artist: "Kailash Kher", yt: "FH8bTKMcRNQ" },
-            { title: "Darkhaast", artist: "Arijit Singh", yt: "A8-5L1qP-8U" },
-            { title: "Tenu Sang Rakhna", artist: "Arijit Singh", yt: "0k57_u0b3aQ" },
-            { title: "Bulleya", artist: "", yt: "MzFGDIJuRnQ" },
-            { title: "Kun Faya Kun", artist: "A.R. Rahman", yt: "T94PHkCQBCQ" },
-            { title: "Dil To Bachcha Hai", artist: "Rahat Fateh Ali Khan", yt: "yqFDWtFbxPg" },
-            { title: "Raabta", artist: "Arijit Singh", yt: "sS6-P1d5H-g" },
-            { title: "O Rangrez", artist: "Shreya Ghoshal", yt: "W5GBH6YsGWg" },
-            { title: "Kaise Hua", artist: "Vishal Mishra", yt: "Fp8msa5uYsc" },
-            { title: "Tu Chahiye", artist: "Atif Aslam", yt: "zuvla6ABKbs" },
-            { title: "Finding Her (Female)", artist: "", yt: "P8cT2Hy96SU" },
-            { title: "Zindagi Kuch Toh Bata", artist: "Jubin Nautiyal", yt: "3hq9SxcJjuQ" },
-            { title: "Mann Mera", artist: "Gajendra Verma", yt: "F0f5nB4h0r4" },
-            { title: "Tera Ghata", artist: "Gajendra Verma", yt: "K3-a8l2gH6k" },
-            { title: "O Saathi", artist: "Atif Aslam", yt: "7R6FoUE7yM8" },
+            { id: 1,  title: "Arz Kiya Hai",            artist: "Anuv Jain",                  yt: "bP8ATWCvqzw" },
+            { id: 2,  title: "Jo Tum Mere Ho",          artist: "Anuv Jain",                  yt: "1K9487uM1u0" },
+            { id: 3,  title: "Husn",                    artist: "Anuv Jain",                  yt: "gJLVTKhTnog" },
+            { id: 4,  title: "Finding Her",             artist: "Kushagra, Bharath, Saaheal", yt: "P8cT2Hy96SU" },
+            { id: 5,  title: "Paro",                    artist: "Aditya Rikhari",             yt: "F3G8gN-y_Dk" },
+            { id: 6,  title: "Afsos",                   artist: "Anuv Jain, AP Dhillon",      yt: "4fB8f-c3c_Y" },
+            { id: 7,  title: "Haseen",                  artist: "Talwiinder",                 yt: "uK48_Jz154I" },
+            { id: 8,  title: "Woh Lamhe Woh Baatein",   artist: "Atif Aslam",                 yt: "5FegZzMj_uA" },
+            { id: 9,  title: "Dooron Dooron",           artist: "Paresh Pahuja",              yt: "qZ1uB1NQKQY" },
+            { id: 10, title: "Sahiba",                  artist: "Aditya Rikhari",             yt: "6P6C4Jd9O9w" },
+            { id: 11, title: "Wishes (Remake)",         artist: "Talwiinder",                 yt: "oE7lU2qj4rY" },
+            { id: 12, title: "12 Years",                artist: "Lucky Rathore",              yt: "Tl9JGFRrfIM" },
+            { id: 13, title: "Khat",                    artist: "Navjot Ahuja",               yt: "BqMNhBWJCbo" },
+            { id: 14, title: "Jaan Se Guzarte Hain",    artist: "Shashwat Sachdev",           yt: "hB8KW6Vn9j8" },
+            { id: 15, title: "Jaiye Sajana",            artist: "Shashwat Sachdev",           yt: "E8PKTB-jLqE" },
+            { id: 16, title: "Aaj Se Teri",             artist: "Arijit Singh",               yt: "L2G349_h49I" },
+            { id: 17, title: "Teri Teri Yaad",          artist: "Atif Aslam",                 yt: "5Fh1VK9Xj5A" },
+            { id: 18, title: "Yeh Fitoor Mera",         artist: "Arijit Singh",               yt: "B65H9G10g3k" },
+            { id: 19, title: "Bairan",                  artist: "Banjaare",                   yt: "NZQNfMT7lWs" },
+            { id: 20, title: "Jugni Kehndiya",          artist: "Tochi Raina",                yt: "qzLtJu-ZI_0" },
+            { id: 21, title: "Jhol (Acoustic)",         artist: "Maanu, Annural Khalid",      yt: "7-GJHPPedpE" },
+            { id: 22, title: "Safar",                   artist: "Bayaan",                     yt: "UJkNQgBCUvQ" },
+            { id: 23, title: "Koodappirannor",          artist: "Sooraj Santhosh, Nila Raj",  yt: "9O7xL6RxnTA" },
+            { id: 24, title: "Udi Udi",                 artist: "Aneesh, Sarkar",             yt: "JpvZB7ZFUQE" },
+            { id: 25, title: "Deewaana Deewaana",       artist: "A.R. Rahman",                yt: "r7bUPL3P99Q" },
+            { id: 26, title: "Othayadi Pathayila",      artist: "Dhibu Ninan Thomas",         yt: "lPqmB7MbCVA" },
+            { id: 27, title: "Paaro",                   artist: "Aditya Rikhari",             yt: "F3G8gN-y_Dk" },
+            { id: 28, title: "Ehsaas",                  artist: "Faheem Abdullah",            yt: "Q8wHBNAn42A" },
+            { id: 29, title: "Ishqa Ve",                artist: "Zeeshan Ali",                yt: "ZLlkl0Oqbv8" },
+            { id: 30, title: "Teri Deewani",            artist: "Kailash Kher",               yt: "FH8bTKMcRNQ" },
+            { id: 31, title: "Darkhaast",               artist: "Arijit Singh",               yt: "A8-5L1qP-8U" },
+            { id: 32, title: "Tenu Sang Rakhna",        artist: "Arijit Singh",               yt: "0k57_u0b3aQ" },
+            { id: 33, title: "Bulleya",                 artist: "Papon",                      yt: "MzFGDIJuRnQ" },
+            { id: 34, title: "Kun Faya Kun",            artist: "A.R. Rahman",                yt: "T94PHkCQBCQ" },
+            { id: 35, title: "Dil To Bachcha Hai",      artist: "Rahat Fateh Ali Khan",       yt: "yqFDWtFbxPg" },
+            { id: 36, title: "Raabta",                  artist: "Arijit Singh",               yt: "sS6-P1d5H-g" },
+            { id: 37, title: "O Rangrez",               artist: "Shreya Ghoshal",             yt: "W5GBH6YsGWg" },
+            { id: 38, title: "Kaise Hua",               artist: "Vishal Mishra",              yt: "Fp8msa5uYsc" },
+            { id: 39, title: "Tu Chahiye",              artist: "Atif Aslam",                 yt: "zuvla6ABKbs" },
+            { id: 40, title: "Finding Her (Female)",    artist: "Kushagra, Saaheal",          yt: "P8cT2Hy96SU" },
+            { id: 41, title: "Zindagi Kuch Toh Bata",   artist: "Jubin Nautiyal",             yt: "3hq9SxcJjuQ" },
+            { id: 42, title: "Mann Mera",               artist: "Gajendra Verma",             yt: "F0f5nB4h0r4" },
+            { id: 43, title: "Tera Ghata",              artist: "Gajendra Verma",             yt: "K3-a8l2gH6k" },
+            { id: 44, title: "O Saathi",                artist: "Atif Aslam",                 yt: "7R6FoUE7yM8" },
         ];
 
         // ════════════════════════════════════════════════════════════════════════════
-        // STATE
+        // UNIFIED STATE (Single Source of Truth)
         // ════════════════════════════════════════════════════════════════════════════
-        let isPlaying = false;
-        let volume = 75;               // 0–100 for audio engine
-        let volAngle = -100 + (volume / 100) * 200;
-        let tuneAngle = 0;
-        let vizRaf = null;
-        let currentIdx = 0;
+        const state = {
+            currentIndex: 0,
+            isPlaying: false,
+            volume: 75, // 0 - 100
+            currentTime: 0,
+            duration: 0,
+            isBuffering: false,
+            isSeeking: false,
+            trayOpen: false,
+        };
+
         let ytPlayer = null;
         let ytReady = false;
         let pendingPlay = false;
-        let trayOpen = false;
         let progressRaf = null;
-        let isSwitchingTrack = false;
+        let vizRaf = null;
         let loadTrackTimeout = null;
+        let isSwitchingTrack = false;
 
-        // Knob drag state
+        // Knob Angles & Drag variables
+        let volAngle = -100 + (state.volume / 100) * 200;
+        let tuneAngle = 0;
         let draggingVol = false, volStartY = 0, volStartAngle = volAngle;
         let draggingTune = false, tuneStartY = 0, tuneStartAngle = 0;
         let tuneAccumPx = 0;
-        const PX_PER_TRACK = 30;
+        const PX_PER_TRACK = 28;
 
-        // Station presets (decorative frequency display)
+        // Station presets (frequency display)
         const stations = {
-            '91.1': { needle: 0.07 },
-            '98.7': { needle: 0.508 },
+            '91.1':  { needle: 0.07  },
+            '98.7':  { needle: 0.508 },
             '103.5': { needle: 0.756 },
             '107.2': { needle: 0.942 },
         };
 
         // ════════════════════════════════════════════════════════════════════════════
-        // DOM REFS
+        // DOM REFERENCES
         // ════════════════════════════════════════════════════════════════════════════
-        const playBtn = document.getElementById('playBtn');
-        const playLed = document.getElementById('playLed');
-        const playIcon = playBtn.querySelector('.icon-play');
-        const stopIcon = playBtn.querySelector('.icon-stop');
-        const lcdFreq = document.getElementById('lcdFreq');
-        const lcdMeta = document.getElementById('lcdMeta');
-        const lcdIdx = document.getElementById('lcdIdx');
+        const playBtn        = document.getElementById('playBtn');
+        const playLed        = document.getElementById('playLed');
+        const playIcon       = playBtn.querySelector('.icon-play');
+        const stopIcon       = playBtn.querySelector('.icon-stop');
+        const lcdFreq        = document.getElementById('lcdFreq');
+        const lcdMeta        = document.getElementById('lcdMeta');
+        const lcdIdx         = document.getElementById('lcdIdx');
         const tunerIndicator = document.getElementById('tunerIndicator');
-        const signalLeds = document.getElementById('signalLeds');
-        const volKnob = document.getElementById('volKnob');
-        const tuneKnob = document.getElementById('tuneKnob');
-        const progressFill = document.getElementById('progressFill');
-        const progressBg = document.getElementById('progressBg');
-        const progressTime = document.getElementById('progressTime');
-        const playlistTray = document.getElementById('playlistTray');
-        const trayHandle = document.getElementById('trayHandle');
-        const listBtn = document.getElementById('listBtn');
-        const lcdListBtn = document.getElementById('lcdListBtn');
-        const trackList = document.getElementById('trackList');
+        const signalLeds     = document.getElementById('signalLeds');
+        const volKnob        = document.getElementById('volKnob');
+        const tuneKnob       = document.getElementById('tuneKnob');
+        const progressFill   = document.getElementById('progressFill');
+        const progressBg     = document.getElementById('progressBg');
+        const progressTime   = document.getElementById('progressTime');
+        const playlistTray   = document.getElementById('playlistTray');
+        const trayHandle     = document.getElementById('trayHandle');
+        const listBtn        = document.getElementById('listBtn');
+        const lcdListBtn     = document.getElementById('lcdListBtn');
+        const trackList      = document.getElementById('trackList');
 
         // ════════════════════════════════════════════════════════════════════════════
-        // YOUTUBE AUDIO ENGINE
+        // YOUTUBE IFRAME API INITIALIZATION
         // ════════════════════════════════════════════════════════════════════════════
         function onYouTubeIframeAPIReady() {
             ytPlayer = new YT.Player('yt-player', {
                 height: '120', width: '200',
-                videoId: PLAYLIST[0].yt,
+                videoId: PLAYLIST[state.currentIndex].yt,
                 playerVars: {
                     autoplay: 0,
                     controls: 0,
@@ -686,7 +710,7 @@
 
         function onPlayerReady(event) {
             ytReady = true;
-            event.target.setVolume(volume);
+            event.target.setVolume(state.volume);
             if (pendingPlay) {
                 event.target.playVideo();
                 pendingPlay = false;
@@ -694,41 +718,52 @@
         }
 
         function onPlayerError(event) {
-            console.warn('Playback error, skipping to next track:', event.data);
-            setTimeout(() => nextTrack(), 200);
+            console.warn('Playback error code:', event.data);
+            lcdMeta.textContent = "TRACK UNAVAILABLE · SKIPPING...";
+            flashLCD();
+            setTimeout(() => {
+                nextTrack(true);
+            }, 1200);
         }
 
         function onPlayerStateChange(event) {
             const S = YT.PlayerState;
             if (event.data === S.PLAYING) {
-                if (!isPlaying) setPlaying(true);
+                state.isPlaying = true;
+                state.isBuffering = false;
+                updateUIState(true);
                 startProgress();
             } else if (event.data === S.ENDED) {
-                // Auto-advance to next track
-                currentIdx = (currentIdx + 1) % PLAYLIST.length;
-                loadAndPlay(currentIdx);
+                // Naturally finished -> Advance to next track
+                nextTrack(true);
             } else if (event.data === S.BUFFERING) {
-                if (isPlaying) startViz();
+                state.isBuffering = true;
+                if (state.isPlaying) startViz();
             } else if (event.data === S.PAUSED) {
-                if (isPlaying && !isSwitchingTrack) {
-                    setPlaying(false);
+                if (state.isPlaying && !isSwitchingTrack) {
+                    state.isPlaying = false;
+                    updateUIState(false);
                     stopProgress();
                 }
             }
         }
 
         // ════════════════════════════════════════════════════════════════════════════
-        // LOAD AND PLAY INDIVIDUAL TRACK
+        // PLAYER CONTROLLER
         // ════════════════════════════════════════════════════════════════════════════
-        function loadAndPlay(idx) {
-            currentIdx = idx;
+        function loadAndPlay(idx, autoStart = true) {
+            state.currentIndex = ((idx % PLAYLIST.length) + PLAYLIST.length) % PLAYLIST.length;
             refreshLCD();
             flashLCD();
-            highlightTrack(idx);
-            setPlaying(true);
+            highlightTrack(state.currentIndex);
+
+            if (autoStart) {
+                state.isPlaying = true;
+                updateUIState(true);
+            }
 
             if (!ytPlayer || !ytReady) {
-                pendingPlay = true;
+                if (autoStart) pendingPlay = true;
                 return;
             }
 
@@ -736,37 +771,104 @@
             if (loadTrackTimeout) clearTimeout(loadTrackTimeout);
             loadTrackTimeout = setTimeout(() => {
                 try {
-                    ytPlayer.loadVideoById({
-                        videoId: PLAYLIST[idx].yt,
-                        startSeconds: 0
-                    });
-                    ytPlayer.playVideo();
+                    if (autoStart) {
+                        ytPlayer.loadVideoById({
+                            videoId: PLAYLIST[state.currentIndex].yt,
+                            startSeconds: 0
+                        });
+                        ytPlayer.playVideo();
+                    } else {
+                        ytPlayer.cueVideoById({
+                            videoId: PLAYLIST[state.currentIndex].yt,
+                            startSeconds: 0
+                        });
+                    }
                 } catch (e) {
                     console.error('Error loading video:', e);
                 } finally {
-                    setTimeout(() => { isSwitchingTrack = false; }, 300);
+                    setTimeout(() => { isSwitchingTrack = false; }, 350);
                 }
             }, 30);
         }
 
-        // ════════════════════════════════════════════════════════════════════════════
-        // HELPERS
-        // ════════════════════════════════════════════════════════════════════════════
-        function setKnob(el, deg) { el.style.transform = `rotate(${deg}deg)`; }
-
-        function refreshLCD() {
-            const t = PLAYLIST[currentIdx];
-            lcdMeta.textContent = t.artist ? `${t.title} · ${t.artist}` : t.title;
-            lcdIdx.textContent = `${String(currentIdx + 1).padStart(2, '0')}/44`;
+        function play() {
+            state.isPlaying = true;
+            updateUIState(true);
+            if (!ytPlayer || !ytReady) {
+                pendingPlay = true;
+                return;
+            }
+            if (ytPlayer.getPlayerState() === YT.PlayerState.PAUSED) {
+                ytPlayer.playVideo();
+            } else {
+                loadAndPlay(state.currentIndex, true);
+            }
         }
 
-        function setPlaying(on) {
-            isPlaying = on;
+        function pause() {
+            state.isPlaying = false;
+            updateUIState(false);
+            if (ytPlayer && ytReady) {
+                ytPlayer.pauseVideo();
+            }
+        }
+
+        function togglePlay() {
+            playBtn.classList.add('pressed');
+            setTimeout(() => playBtn.classList.remove('pressed'), 140);
+            state.isPlaying ? pause() : play();
+        }
+
+        function nextTrack(autoPlay = true) {
+            state.currentIndex = (state.currentIndex + 1) % PLAYLIST.length;
+            loadAndPlay(state.currentIndex, autoPlay || state.isPlaying);
+        }
+
+        function prevTrack(autoPlay = true) {
+            // If current playback time > 3 seconds: restart current song from 0
+            if (ytPlayer && ytReady) {
+                try {
+                    const curTime = ytPlayer.getCurrentTime() || 0;
+                    if (curTime > 3) {
+                        ytPlayer.seekTo(0, true);
+                        progressFill.style.width = '0%';
+                        progressTime.textContent = '0:00';
+                        return;
+                    }
+                } catch(e) {}
+            }
+            // Otherwise move to previous track
+            state.currentIndex = (state.currentIndex - 1 + PLAYLIST.length) % PLAYLIST.length;
+            loadAndPlay(state.currentIndex, autoPlay || state.isPlaying);
+        }
+
+        // ════════════════════════════════════════════════════════════════════════════
+        // UI SYNCHRONIZATION HELPERS
+        // ════════════════════════════════════════════════════════════════════════════
+        function setKnob(el, deg) {
+            el.style.transform = `rotate(${deg}deg)`;
+        }
+
+        function refreshLCD() {
+            const t = PLAYLIST[state.currentIndex];
+            lcdMeta.textContent = t.artist ? `${t.title} · ${t.artist}` : t.title;
+            lcdIdx.textContent = `${String(state.currentIndex + 1).padStart(2, '0')}/44`;
+        }
+
+        function updateUIState(on) {
             playIcon.style.display = on ? 'none' : '';
             stopIcon.style.display = on ? '' : 'none';
-            on ? playLed.classList.add('on') : playLed.classList.remove('on');
-            on ? signalLeds.classList.add('active') : signalLeds.classList.remove('active');
-            on ? startViz() : stopViz();
+            playBtn.setAttribute('aria-label', on ? 'Pause Track' : 'Play Track');
+            playBtn.setAttribute('aria-pressed', on ? 'true' : 'false');
+            if (on) {
+                playLed.classList.add('on');
+                signalLeds.classList.add('active');
+                startViz();
+            } else {
+                playLed.classList.remove('on');
+                signalLeds.classList.remove('active');
+                stopViz();
+            }
         }
 
         function flashLCD() {
@@ -775,6 +877,7 @@
         }
 
         function fmtTime(s) {
+            if (isNaN(s) || !isFinite(s) || s < 0) return '0:00';
             const m = Math.floor(s / 60);
             const ss = String(Math.floor(s % 60)).padStart(2, '0');
             return `${m}:${ss}`;
@@ -784,62 +887,72 @@
         function startProgress() {
             if (progressRaf) return;
             (function tick() {
-                if (ytPlayer && ytReady) {
+                if (ytPlayer && ytReady && !state.isSeeking) {
                     try {
                         const cur = ytPlayer.getCurrentTime() || 0;
-                        const dur = ytPlayer.getDuration() || 1;
-                        progressFill.style.width = `${(cur / dur) * 100}%`;
+                        const dur = ytPlayer.getDuration() || 0;
+                        state.currentTime = cur;
+                        state.duration = dur;
+                        if (dur > 0) {
+                            const pct = Math.min(100, Math.max(0, (cur / dur) * 100));
+                            progressFill.style.width = `${pct}%`;
+                            progressBg.setAttribute('aria-valuenow', Math.round(pct));
+                        }
                         progressTime.textContent = fmtTime(cur);
                     } catch (e) { }
                 }
                 progressRaf = requestAnimationFrame(tick);
             })();
         }
+
         function stopProgress() {
-            cancelAnimationFrame(progressRaf);
-            progressRaf = null;
+            if (progressRaf) {
+                cancelAnimationFrame(progressRaf);
+                progressRaf = null;
+            }
         }
 
-        // Click to seek
-        progressBg.addEventListener('click', e => {
+        // Click & Drag to Seek
+        function handleSeek(clientX) {
             if (!ytPlayer || !ytReady) return;
             const rect = progressBg.getBoundingClientRect();
-            const pct = (e.clientX - rect.left) / rect.width;
-            ytPlayer.seekTo(pct * (ytPlayer.getDuration() || 0), true);
-        });
-
-        // ════════════════════════════════════════════════════════════════════════════
-        // TRACK NAVIGATION
-        // ════════════════════════════════════════════════════════════════════════════
-        function nextTrack() {
-            currentIdx = (currentIdx + 1) % PLAYLIST.length;
-            loadAndPlay(currentIdx);
+            const pct = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
+            const dur = ytPlayer.getDuration() || 0;
+            progressFill.style.width = `${pct * 100}%`;
+            progressTime.textContent = fmtTime(pct * dur);
+            ytPlayer.seekTo(pct * dur, true);
         }
 
-        function prevTrack() {
-            currentIdx = (currentIdx - 1 + PLAYLIST.length) % PLAYLIST.length;
-            loadAndPlay(currentIdx);
-        }
+        progressBg.addEventListener('click', e => handleSeek(e.clientX));
 
         // ════════════════════════════════════════════════════════════════════════════
-        // PLAYLIST LIST BUILDER
+        // PLAYLIST DRAWER BUILDER
         // ════════════════════════════════════════════════════════════════════════════
         function buildTrackList() {
             trackList.innerHTML = '';
             PLAYLIST.forEach((t, i) => {
                 const item = document.createElement('div');
-                item.className = 'track-item' + (i === currentIdx ? ' active' : '');
+                item.className = 'track-item' + (i === state.currentIndex ? ' active' : '');
                 item.dataset.idx = i;
+                item.setAttribute('role', 'listitem');
+                item.setAttribute('tabindex', '0');
+                item.setAttribute('aria-label', `${t.title} by ${t.artist || 'Unknown'}`);
                 item.innerHTML = `
-            <span class="track-num">${String(i + 1).padStart(2, '0')}</span>
-            <div class="cd-disc"></div>
-            <div class="track-info">
-                <div class="track-title">${t.title}</div>
-                ${t.artist ? `<div class="track-artist">${t.artist}</div>` : ''}
-            </div>
-            <span class="track-play-icon">${i === currentIdx ? '▶' : ''}</span>`;
-                item.addEventListener('click', () => {
-                    loadAndPlay(i);
+                    <span class="track-num">${String(i + 1).padStart(2, '0')}</span>
+                    <div class="cd-disc" aria-hidden="true"></div>
+                    <div class="track-info">
+                        <div class="track-title">${t.title}</div>
+                        ${t.artist ? `<div class="track-artist">${t.artist}</div>` : ''}
+                    </div>
+                    <span class="track-play-icon" aria-hidden="true">${i === state.currentIndex ? '▶' : ''}</span>`;
+                
+                const selectTrack = () => loadAndPlay(i, true);
+                item.addEventListener('click', selectTrack);
+                item.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        selectTrack();
+                    }
                 });
                 trackList.appendChild(item);
             });
@@ -847,94 +960,139 @@
 
         function highlightTrack(idx) {
             document.querySelectorAll('.track-item').forEach((el, i) => {
-                el.classList.toggle('active', i === idx);
-                el.querySelector('.track-play-icon').textContent = i === idx ? '▶' : '';
+                const isActive = (i === idx);
+                el.classList.toggle('active', isActive);
+                const playIconSpan = el.querySelector('.track-play-icon');
+                if (playIconSpan) playIconSpan.textContent = isActive ? '▶' : '';
             });
             const active = trackList.querySelector('.track-item.active');
-            if (active) active.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
-        }
-
-        // ════════════════════════════════════════════════════════════════════════════
-        // PLAY / STOP
-        // ════════════════════════════════════════════════════════════════════════════
-        function play() {
-            setPlaying(true);
-            if (!ytPlayer || !ytReady) {
-                pendingPlay = true;
-                return;
-            }
-            if (ytPlayer.getPlayerState() === YT.PlayerState.PAUSED) {
-                ytPlayer.playVideo();
-            } else {
-                loadAndPlay(currentIdx);
+            if (active && state.trayOpen) {
+                active.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
             }
         }
 
-        function stop() {
-            setPlaying(false);
-            if (ytPlayer && ytReady) {
-                ytPlayer.pauseVideo();
+        // Toggle Playlist Drawer
+        function toggleTray() {
+            state.trayOpen = !state.trayOpen;
+            playlistTray.classList.toggle('open', state.trayOpen);
+            trayHandle.setAttribute('aria-expanded', state.trayOpen ? 'true' : 'false');
+            if (listBtn) listBtn.classList.toggle('active', state.trayOpen);
+            if (lcdListBtn) {
+                lcdListBtn.classList.toggle('active', state.trayOpen);
+                lcdListBtn.classList.add('pressed');
+                setTimeout(() => lcdListBtn.classList.remove('pressed'), 120);
+            }
+            if (state.trayOpen) {
+                setTimeout(() => {
+                    const active = trackList.querySelector('.track-item.active');
+                    if (active) active.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+                }, 80);
             }
         }
 
-        playBtn.addEventListener('click', () => {
-            playBtn.classList.add('pressed');
-            setTimeout(() => playBtn.classList.remove('pressed'), 150);
-            isPlaying ? stop() : play();
+        trayHandle.addEventListener('click', toggleTray);
+        trayHandle.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                toggleTray();
+            }
         });
+        if (listBtn) listBtn.addEventListener('click', toggleTray);
+        if (lcdListBtn) lcdListBtn.addEventListener('click', toggleTray);
+
+        playBtn.addEventListener('click', togglePlay);
 
         // ════════════════════════════════════════════════════════════════════════════
-        // KNOBS
+        // VOLUME & TUNE KNOBS (Mouse + Touch Support)
         // ════════════════════════════════════════════════════════════════════════════
         setKnob(volKnob, volAngle);
         setKnob(tuneKnob, tuneAngle);
 
-        // Volume knob
-        volKnob.parentElement.addEventListener('mousedown', e => {
-            draggingVol = true; volStartY = e.clientY; volStartAngle = volAngle;
+        // Volume knob interaction
+        function startVolDrag(clientY) {
+            draggingVol = true;
+            volStartY = clientY;
+            volStartAngle = volAngle;
             document.body.style.cursor = 'ns-resize';
-        });
-        window.addEventListener('mousemove', e => {
+        }
+        function moveVolDrag(clientY) {
             if (!draggingVol) return;
-            const delta = (volStartY - e.clientY) * 1.5;
+            const delta = (volStartY - clientY) * 1.5;
             volAngle = Math.max(-100, Math.min(100, volStartAngle + delta));
-            volume = Math.round((volAngle + 100) / 2); // 0 - 100
+            state.volume = Math.round((volAngle + 100) / 2); // 0 - 100
             setKnob(volKnob, volAngle);
-            if (ytPlayer && ytReady) ytPlayer.setVolume(volume);
-        });
-        window.addEventListener('mouseup', () => {
-            if (draggingVol) { draggingVol = false; document.body.style.cursor = ''; }
-        });
+            if (ytPlayer && ytReady) ytPlayer.setVolume(state.volume);
+        }
+        function endVolDrag() {
+            if (draggingVol) {
+                draggingVol = false;
+                document.body.style.cursor = '';
+            }
+        }
 
-        // Tune knob — drag ↑ = next · drag ↓ = prev
-        tuneKnob.parentElement.addEventListener('mousedown', e => {
-            draggingTune = true; tuneStartY = e.clientY;
-            tuneStartAngle = tuneAngle; tuneAccumPx = 0;
+        volKnob.parentElement.addEventListener('mousedown', e => startVolDrag(e.clientY));
+        window.addEventListener('mousemove', e => moveVolDrag(e.clientY));
+        window.addEventListener('mouseup', endVolDrag);
+
+        volKnob.parentElement.addEventListener('touchstart', e => {
+            if (e.touches.length > 0) startVolDrag(e.touches[0].clientY);
+        }, { passive: true });
+        window.addEventListener('touchmove', e => {
+            if (draggingVol && e.touches.length > 0) moveVolDrag(e.touches[0].clientY);
+        }, { passive: true });
+        window.addEventListener('touchend', endVolDrag);
+
+        // Tuning knob interaction
+        function startTuneDrag(clientY) {
+            draggingTune = true;
+            tuneStartY = clientY;
+            tuneStartAngle = tuneAngle;
+            tuneAccumPx = 0;
             document.body.style.cursor = 'ns-resize';
-        });
-        window.addEventListener('mousemove', e => {
+        }
+        function moveTuneDrag(clientY) {
             if (!draggingTune) return;
-            const rawDeltaPx = tuneStartY - e.clientY;
+            const rawDeltaPx = tuneStartY - clientY;
             tuneAngle = tuneStartAngle + rawDeltaPx * 1.5;
             setKnob(tuneKnob, tuneAngle);
 
-            // Move needle decoratively
+            // Move indicator needle decoratively
             const raw = ((tuneAngle % 360) + 360) % 360;
             tunerIndicator.style.left = `${(raw / 360) * 100}%`;
             lcdFreq.textContent = (87.5 + (raw / 360) * (108 - 87.5)).toFixed(1);
 
-            // Track step via threshold
+            // Step track based on pixel threshold
             const steps = Math.floor(rawDeltaPx / PX_PER_TRACK);
             const needed = steps - Math.round(tuneAccumPx / PX_PER_TRACK);
-            if (needed > 0) { nextTrack(); tuneAccumPx += PX_PER_TRACK; }
-            else if (needed < 0) { prevTrack(); tuneAccumPx -= PX_PER_TRACK; }
-        });
-        window.addEventListener('mouseup', () => {
-            if (draggingTune) { draggingTune = false; document.body.style.cursor = ''; }
-        });
+            if (needed > 0) {
+                nextTrack(state.isPlaying);
+                tuneAccumPx += PX_PER_TRACK;
+            } else if (needed < 0) {
+                prevTrack(state.isPlaying);
+                tuneAccumPx -= PX_PER_TRACK;
+            }
+        }
+        function endTuneDrag() {
+            if (draggingTune) {
+                draggingTune = false;
+                document.body.style.cursor = '';
+            }
+        }
+
+        tuneKnob.parentElement.addEventListener('mousedown', e => startTuneDrag(e.clientY));
+        window.addEventListener('mousemove', e => moveTuneDrag(e.clientY));
+        window.addEventListener('mouseup', endTuneDrag);
+
+        tuneKnob.parentElement.addEventListener('touchstart', e => {
+            if (e.touches.length > 0) startTuneDrag(e.touches[0].clientY);
+        }, { passive: true });
+        window.addEventListener('touchmove', e => {
+            if (draggingTune && e.touches.length > 0) moveTuneDrag(e.touches[0].clientY);
+        }, { passive: true });
+        window.addEventListener('touchend', endTuneDrag);
 
         // ════════════════════════════════════════════════════════════════════════════
-        // PRESET BUTTONS (decorative station-switching)
+        // STATION PRESETS
         // ════════════════════════════════════════════════════════════════════════════
         document.querySelectorAll('.preset-btn').forEach(btn => {
             btn.addEventListener('click', () => {
@@ -954,7 +1112,7 @@
         tunerIndicator.style.left = `${stations['98.7'].needle * 100}%`;
 
         function animateFreq(from, to) {
-            const dur = 400, start = performance.now();
+            const dur = 350, start = performance.now();
             (function step(now) {
                 const t = Math.min((now - start) / dur, 1);
                 const e = 1 - Math.pow(1 - t, 3);
@@ -964,31 +1122,7 @@
         }
 
         // ════════════════════════════════════════════════════════════════════════════
-        // PLAYLIST TRAY TOGGLE
-        // ════════════════════════════════════════════════════════════════════════════
-        function toggleTray() {
-            trayOpen = !trayOpen;
-            playlistTray.classList.toggle('open', trayOpen);
-            if (listBtn) listBtn.classList.toggle('active', trayOpen);
-            if (lcdListBtn) {
-                lcdListBtn.classList.toggle('active', trayOpen);
-                lcdListBtn.classList.add('pressed');
-                setTimeout(() => lcdListBtn.classList.remove('pressed'), 120);
-            }
-            if (trayOpen) {
-                setTimeout(() => {
-                    const active = trackList.querySelector('.track-item.active');
-                    if (active) active.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
-                }, 50);
-            }
-        }
-
-        if (trayHandle) trayHandle.addEventListener('click', toggleTray);
-        if (listBtn) listBtn.addEventListener('click', toggleTray);
-        if (lcdListBtn) lcdListBtn.addEventListener('click', toggleTray);
-
-        // ════════════════════════════════════════════════════════════════════════════
-        // SIGNAL LED VISUALIZER
+        // AUDIO LED VISUALIZER
         // ════════════════════════════════════════════════════════════════════════════
         function startViz() {
             if (vizRaf) return;
@@ -1005,18 +1139,22 @@
                 vizRaf = requestAnimationFrame(frame);
             })();
         }
+
         function stopViz() {
-            cancelAnimationFrame(vizRaf); vizRaf = null;
+            if (vizRaf) {
+                cancelAnimationFrame(vizRaf);
+                vizRaf = null;
+            }
             document.querySelectorAll('.signal-leds span').forEach(s => s.classList.remove('lit', 'peak'));
         }
 
         // ════════════════════════════════════════════════════════════════════════════
-        // INIT
+        // INITIALIZATION
         // ════════════════════════════════════════════════════════════════════════════
         refreshLCD();
         buildTrackList();
 
-        // Slow ambient background video playback
+        // Slow ambient background video loop
         const bgVideo = document.querySelector('.bg-video');
         if (bgVideo) {
             bgVideo.playbackRate = 0.35;
@@ -1024,10 +1162,14 @@
             bgVideo.addEventListener('play', () => { bgVideo.playbackRate = 0.35; });
         }
 
-        document.querySelector('.radio-body').animate([
-            { opacity: 0, transform: 'translateY(40px) scale(0.97)' },
-            { opacity: 1, transform: 'translateY(0) scale(1)' }
-        ], { duration: 700, easing: 'cubic-bezier(0.16,1,0.3,1)', fill: 'forwards' });
+        // Entrance animation
+        const radioBodyEl = document.querySelector('.radio-body');
+        if (radioBodyEl) {
+            radioBodyEl.animate([
+                { opacity: 0, transform: 'translateY(40px) scale(0.97)' },
+                { opacity: 1, transform: 'translateY(0) scale(1)' }
+            ], { duration: 650, easing: 'cubic-bezier(0.16, 1, 0.3, 1)', fill: 'forwards' });
+        }
     </script>
 </body>
 
