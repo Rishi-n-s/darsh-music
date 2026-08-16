@@ -1579,6 +1579,7 @@ body {
     html,
     body {
         align-items: flex-end;
+        overflow-y: auto;
     }
 
     .bg-video-landscape {
@@ -1589,13 +1590,12 @@ body {
         object-position: center center !important;
     }
 
-    /* Keep top title small and compact so the background and boy are in full view */
     .site-header {
-        top: clamp(6px, 1.5vh, 12px);
+        top: clamp(4px, 1vh, 8px);
     }
 
     .site-title.hindi-retro-title {
-        font-size: clamp(26px, 6.5vw, 36px);
+        font-size: clamp(22px, 5.5vw, 30px);
         gap: 0;
         text-shadow:
             1px 1px 0px #b82d22,
@@ -1613,83 +1613,85 @@ body {
         justify-content: center;
     }
 
-    /* Sleek, ultra-compact horizontal radio docked at bottom */
+    /* ── VERTICAL STACKED LAYOUT: BIG VIDEO ON TOP, CONTROLS BELOW ── */
     .radio-body {
         display: flex !important;
-        flex-direction: row !important;
+        flex-direction: column !important;
         width: min(480px, 96vw) !important;
-        height: 135px !important;
-        min-height: 135px !important;
+        height: auto !important;
+        min-height: auto !important;
         border-radius: 14px !important;
         opacity: 1 !important;
         visibility: visible !important;
         z-index: 30;
+        transform: scale(1) !important;
     }
 
+    /* ── BIG VIDEO SCREEN ON TOP ── */
     .speaker-panel {
-        width: 130px !important;
-        border-right: 1px solid #c9b397 !important;
-        border-bottom: none !important;
-        padding: 4px 6px !important;
+        width: 100% !important;
+        border-right: none !important;
+        border-bottom: 1px solid #c9b397 !important;
+        padding: 8px 8px 6px !important;
         display: flex !important;
         flex-direction: column;
         justify-content: center;
         align-items: center;
-        gap: 2px;
+        gap: 4px;
+        box-shadow: none !important;
     }
 
     .radio-tv-screen {
-        width: 118px !important;
-        max-width: 118px !important;
-        height: 72px !important;
-        border-radius: 8px !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        height: 52vw !important;
+        max-height: 260px !important;
+        border-radius: 10px !important;
     }
 
     .tv-spiderman-mini {
-        display: flex !important;
-        height: 75%;
-        max-height: 54px;
-        right: 2px;
+        display: none !important;
     }
 
     .speaker-logo {
         display: none !important;
     }
 
+    /* ── CONTROLS ROW BELOW VIDEO ── */
     .center-panel {
-        padding: 4px 6px !important;
-        gap: 2px !important;
-        flex: 1 !important;
+        padding: 4px 8px !important;
+        gap: 3px !important;
+        flex: 0 0 auto !important;
         display: flex !important;
         flex-direction: column;
         justify-content: space-between;
     }
 
     .lcd-shell {
-        padding: 2px 6px !important;
+        padding: 3px 8px !important;
         border-radius: 6px;
-        gap: 4px;
+        gap: 6px;
     }
 
     .lcd-freq {
-        font-size: 15px !important;
+        font-size: 18px !important;
     }
 
     .lcd-band, .lcd-mhz {
-        font-size: 7.5px !important;
+        font-size: 8px !important;
     }
 
     .lcd-meta {
-        font-size: 8px !important;
-        max-width: 130px;
+        font-size: 8.5px !important;
+        max-width: 200px;
     }
 
     .lcd-track-idx {
-        font-size: 7px !important;
+        font-size: 7.5px !important;
     }
 
     .lcd-list-btn {
-        padding: 2px 4px !important;
+        padding: 3px 6px !important;
         font-size: 7px !important;
     }
 
@@ -1698,17 +1700,17 @@ body {
     }
 
     .progress-wrap {
-        height: 10px !important;
-        gap: 4px !important;
+        height: 12px !important;
+        gap: 6px !important;
     }
 
     .progress-bar-bg {
-        height: 4px !important;
+        height: 5px !important;
     }
 
     .progress-time {
-        font-size: 7px !important;
-        min-width: 22px;
+        font-size: 8px !important;
+        min-width: 26px;
     }
 
     .tuner-band {
@@ -1716,7 +1718,7 @@ body {
     }
 
     .presets-row {
-        gap: 2px !important;
+        gap: 3px !important;
     }
 
     .preset-group-label {
@@ -1724,33 +1726,35 @@ body {
     }
 
     .presets-btns {
-        gap: 2px !important;
+        gap: 3px !important;
     }
 
     .preset-btn {
-        padding: 2px 4px !important;
-        border-radius: 3px !important;
+        padding: 3px 5px !important;
+        border-radius: 4px !important;
     }
 
     .preset-btn .deck-icon-svg {
-        width: 8px !important;
-        height: 8px !important;
+        width: 9px !important;
+        height: 9px !important;
     }
 
     .p-freq {
-        font-size: 6px !important;
+        font-size: 6.5px !important;
     }
 
+    /* Right panel becomes a horizontal row at bottom */
     .right-panel {
-        border-left: 1px solid rgba(255, 140, 30, 0.15) !important;
-        border-top: none !important;
-        padding: 0 6px !important;
-        gap: 5px !important;
-        width: auto !important;
+        border-left: none !important;
+        border-top: 1px solid #c9b397 !important;
+        padding: 6px 10px !important;
+        gap: 8px !important;
+        width: 100% !important;
         display: flex !important;
         flex-direction: row;
         align-items: center;
         justify-content: center;
+        box-shadow: none !important;
     }
 
     .right-panel::before {
@@ -1759,7 +1763,8 @@ body {
 
     .panel-divider {
         display: block !important;
-        height: 40px !important;
+        width: 1px !important;
+        height: 30px !important;
     }
 
     .knob-group {
@@ -1767,17 +1772,17 @@ body {
     }
 
     .knob-label {
-        font-size: 6px !important;
+        font-size: 6.5px !important;
     }
 
     .knob-ring {
-        width: 26px !important;
-        height: 26px !important;
+        width: 28px !important;
+        height: 28px !important;
     }
 
     .knob {
-        width: 19px !important;
-        height: 19px !important;
+        width: 20px !important;
+        height: 20px !important;
     }
 
     .knob-marker {
@@ -1795,14 +1800,14 @@ body {
     }
 
     .play-button {
-        width: 28px !important;
-        height: 28px !important;
+        width: 32px !important;
+        height: 32px !important;
         border-radius: 6px !important;
     }
 
     .play-button svg {
-        width: 13px !important;
-        height: 13px !important;
+        width: 14px !important;
+        height: 14px !important;
     }
 
     .play-led {
@@ -1813,10 +1818,14 @@ body {
     }
 
     .play-label {
-        font-size: 6px !important;
+        font-size: 6.5px !important;
     }
 
     .antenna-base {
+        display: none !important;
+    }
+
+    .character-wrapper {
         display: none !important;
     }
 }
@@ -1830,28 +1839,17 @@ body {
         object-position: center center !important;
     }
 
-    .radio-body {
-        height: 125px !important;
-        min-height: 125px !important;
-    }
-
-    .speaker-panel {
-        width: 110px !important;
-        padding: 3px 4px !important;
-    }
-
     .radio-tv-screen {
-        width: 100px !important;
-        max-width: 100px !important;
-        height: 60px !important;
-    }
-
-    .tv-spiderman-mini {
-        max-height: 46px !important;
+        height: 48vw !important;
+        max-height: 220px !important;
     }
 
     .lcd-meta {
-        max-width: 100px !important;
+        max-width: 160px !important;
+    }
+
+    .lcd-freq {
+        font-size: 16px !important;
     }
 }
 
@@ -1864,26 +1862,17 @@ body {
         object-position: center center !important;
     }
 
-    .radio-body {
-        height: 115px !important;
-        min-height: 115px !important;
-    }
-
-    .speaker-panel {
-        width: 95px !important;
-    }
-
     .radio-tv-screen {
-        width: 88px !important;
-        height: 54px !important;
-    }
-
-    .tv-spiderman-mini {
-        max-height: 40px !important;
+        height: 45vw !important;
+        max-height: 180px !important;
     }
 
     .lcd-freq {
         font-size: 14px !important;
+    }
+
+    .lcd-meta {
+        max-width: 120px !important;
     }
 
     .preset-btn {
