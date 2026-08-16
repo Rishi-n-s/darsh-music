@@ -1552,11 +1552,11 @@ body {
 
     /* Keep top title small and compact so the background and boy are in full view */
     .site-header {
-        top: 6px;
+        top: clamp(6px, 1.5vh, 12px);
     }
 
     .site-title.hindi-retro-title {
-        font-size: clamp(24px, 5.8vw, 34px);
+        font-size: clamp(26px, 6.5vw, 36px);
         gap: 0;
         text-shadow:
             1px 1px 0px #b82d22,
@@ -1566,65 +1566,219 @@ body {
     }
 
     .scene {
-        padding: 0 6px 8px;
+        padding: 0 6px 10px;
+        position: relative;
+        z-index: 25;
+        width: 100%;
+        display: flex;
+        justify-content: center;
     }
 
-    /* Sleek, compact low-profile radio docked at bottom */
+    /* Sleek, ultra-compact horizontal radio docked at bottom */
     .radio-body {
-        flex-direction: column;
-        width: min(420px, 96vw);
-        height: auto;
-        border-radius: 14px;
+        display: flex !important;
+        flex-direction: row !important;
+        width: min(480px, 96vw) !important;
+        height: 135px !important;
+        min-height: 135px !important;
+        border-radius: 14px !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+        z-index: 30;
     }
 
     .speaker-panel {
-        width: 100%;
-        border-right: none;
-        border-bottom: 1px solid #c9b397;
-        padding: 5px 8px 3px;
+        width: 130px !important;
+        border-right: 1px solid #c9b397 !important;
+        border-bottom: none !important;
+        padding: 4px 6px !important;
+        display: flex !important;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        gap: 2px;
     }
 
     .radio-tv-screen {
-        width: 100%;
-        max-width: 200px;
-        height: 90px;
-        border-radius: 10px;
+        width: 118px !important;
+        max-width: 118px !important;
+        height: 72px !important;
+        border-radius: 8px !important;
     }
 
     .tv-spiderman-mini {
-        display: flex;
-        height: 80%;
-        max-height: 75px;
-        right: 4px;
+        display: flex !important;
+        height: 75%;
+        max-height: 54px;
+        right: 2px;
     }
 
     .speaker-logo {
-        display: none;
+        display: none !important;
     }
 
     .center-panel {
-        padding: 5px 8px 3px;
-        gap: 3px;
+        padding: 4px 6px !important;
+        gap: 2px !important;
+        flex: 1 !important;
+        display: flex !important;
+        flex-direction: column;
+        justify-content: space-between;
+    }
+
+    .lcd-shell {
+        padding: 2px 6px !important;
+        border-radius: 6px;
+        gap: 4px;
     }
 
     .lcd-freq {
-        font-size: 20px;
+        font-size: 15px !important;
+    }
+
+    .lcd-band, .lcd-mhz {
+        font-size: 7.5px !important;
+    }
+
+    .lcd-meta {
+        font-size: 8px !important;
+        max-width: 130px;
+    }
+
+    .lcd-track-idx {
+        font-size: 7px !important;
+    }
+
+    .lcd-list-btn {
+        padding: 2px 4px !important;
+        font-size: 7px !important;
+    }
+
+    .signal-leds {
+        display: none !important;
+    }
+
+    .progress-wrap {
+        height: 10px !important;
+        gap: 4px !important;
+    }
+
+    .progress-bar-bg {
+        height: 4px !important;
+    }
+
+    .progress-time {
+        font-size: 7px !important;
+        min-width: 22px;
+    }
+
+    .tuner-band {
+        display: none !important;
+    }
+
+    .presets-row {
+        gap: 2px !important;
+    }
+
+    .preset-group-label {
+        display: none !important;
+    }
+
+    .presets-btns {
+        gap: 2px !important;
+    }
+
+    .preset-btn {
+        padding: 2px 4px !important;
+        border-radius: 3px !important;
+    }
+
+    .preset-btn .deck-icon-svg {
+        width: 8px !important;
+        height: 8px !important;
+    }
+
+    .p-freq {
+        font-size: 6px !important;
     }
 
     .right-panel {
-        border-left: none;
-        border-top: 1px solid #c9b397;
-        padding: 5px 12px 6px;
-        justify-content: space-between;
-        width: 100%;
+        border-left: 1px solid rgba(255, 140, 30, 0.15) !important;
+        border-top: none !important;
+        padding: 0 6px !important;
+        gap: 5px !important;
+        width: auto !important;
+        display: flex !important;
+        flex-direction: row;
+        align-items: center;
+        justify-content: center;
     }
 
     .right-panel::before {
         display: none;
     }
 
+    .panel-divider {
+        display: block !important;
+        height: 40px !important;
+    }
+
+    .knob-group {
+        gap: 2px !important;
+    }
+
+    .knob-label {
+        font-size: 6px !important;
+    }
+
+    .knob-ring {
+        width: 26px !important;
+        height: 26px !important;
+    }
+
+    .knob {
+        width: 19px !important;
+        height: 19px !important;
+    }
+
+    .knob-marker {
+        width: 2px;
+        height: 4px;
+        top: 2px;
+    }
+
+    .knob-ticks {
+        display: none !important;
+    }
+
+    .play-group {
+        gap: 2px !important;
+    }
+
+    .play-button {
+        width: 28px !important;
+        height: 28px !important;
+        border-radius: 6px !important;
+    }
+
+    .play-button svg {
+        width: 13px !important;
+        height: 13px !important;
+    }
+
+    .play-led {
+        width: 4px !important;
+        height: 4px !important;
+        top: 3px !important;
+        right: 3px !important;
+    }
+
+    .play-label {
+        font-size: 6px !important;
+    }
+
     .antenna-base {
-        display: none;
+        display: none !important;
     }
 }
 
@@ -1635,6 +1789,30 @@ body {
     .bg-video-portrait {
         display: block !important;
         object-position: center center !important;
+    }
+
+    .radio-body {
+        height: 125px !important;
+        min-height: 125px !important;
+    }
+
+    .speaker-panel {
+        width: 110px !important;
+        padding: 3px 4px !important;
+    }
+
+    .radio-tv-screen {
+        width: 100px !important;
+        max-width: 100px !important;
+        height: 60px !important;
+    }
+
+    .tv-spiderman-mini {
+        max-height: 46px !important;
+    }
+
+    .lcd-meta {
+        max-width: 100px !important;
     }
 }
 
@@ -1647,20 +1825,38 @@ body {
         object-position: center center !important;
     }
 
+    .radio-body {
+        height: 115px !important;
+        min-height: 115px !important;
+    }
+
+    .speaker-panel {
+        width: 95px !important;
+    }
+
+    .radio-tv-screen {
+        width: 88px !important;
+        height: 54px !important;
+    }
+
+    .tv-spiderman-mini {
+        max-height: 40px !important;
+    }
+
     .lcd-freq {
-        font-size: 17px;
+        font-size: 14px !important;
     }
 
     .preset-btn {
-        padding: 3px 4px;
+        padding: 2px 3px !important;
     }
 
     .p-freq {
-        font-size: 6.5px;
+        font-size: 5.5px !important;
     }
 
     .presets-row {
-        gap: 3px;
+        gap: 2px !important;
     }
 }
 
