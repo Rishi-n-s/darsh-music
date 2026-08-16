@@ -1,0 +1,18 @@
+{
+  "name": "DARSH D PLAYLIST — Retro FM Radio",
+  "short_name": "Darsh Radio",
+  "description": "A retro skeuomorphic FM radio and music video player that plays seamlessly online and offline.",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#0d0804",
+  "theme_color": "#ff8800",
+  "icons": [
+    {
+      "src": "asstes/105059-the-spider-man-into-spider-verse-png-download-free.png",
+      "sizes": "192x192 512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
