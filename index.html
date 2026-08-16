@@ -2,755 +2,942 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DARSH D PLAYLIST — Retro FM Radio</title>
-    <meta name="description" content="DARSH D PLAYLIST — A retro skeuomorphic FM radio player featuring curated music tracks.">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Rozha+One&family=Yatra+One&family=Gotu&family=Share+Tech+Mono&family=Outfit:wght@400;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap"
-        rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
-
-    <style>
-        /* ── Hidden audio player engine ── */
-        #radioAudioEngine {
-            display: none;
-        }
-
-        /* 3D Skeuomorphic Debossed Progress Slider */
-        .progress-wrap {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 0 2px;
-            user-select: none;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DARSH D PLAYLIST — Retro FM Radio</title>
+  <meta name="description"
+    content="DARSH D PLAYLIST — A retro skeuomorphic FM radio player featuring curated music tracks.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Rozha+One&family=Yatra+One&family=Gotu&family=Share+Tech+Mono&family=Outfit:wght@400;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
-    <!-- ══ VINTAGE BOLLYWOOD TITLE ══ -->
-    <header class="site-header" role="banner">
-        <h1 class="site-title hindi-retro-title">
-            <span class="hindi-line">दर्श</span>
-            <span class="hindi-line">प्लेलिस्ट</span>
-        </h1>
-    </header>
+  <!-- ══ VINTAGE BOLLYWOOD TITLE ══ -->
+  <header class="site-header" role="banner">
+    <h1 class="site-title hindi-retro-title">
+      <span class="hindi-line">दर्श</span>
+      <span class="hindi-line">प्लेलिस्ट</span>
+    </h1>
+  </header>
 
-    <!-- ══ Background Video Loop ══ -->
-    <video class="bg-video" autoplay muted loop playsinline aria-hidden="true">
-        <source src="make_a_loop_video_of_this_imag.mp4" type="video/mp4">
-    </video>
+  <!-- ══ Background Video Loop ══ -->
+  <video class="bg-video" autoplay muted loop playsinline aria-hidden="true">
+    <source src="make_a_loop_video_of_this_imag.mp4" type="video/mp4">
+  </video>
 
-    <!-- Hidden Local Audio Player Engine -->
-    <audio id="radioAudioEngine" preload="auto"></audio>
+  <!-- ══ FLOATING PLAYLIST TOGGLE (MOBILE / RESPONSIVE) ══ -->
+  <button class="mobile-playlist-toggle" id="mobilePlaylistToggle" aria-label="Toggle Playlist" title="Toggle Playlist">
+    <svg class="deck-icon-svg" viewBox="0 0 24 24" width="13" height="13" fill="currentColor" aria-hidden="true">
+      <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z" />
+    </svg>
+    <span>PLAYLIST</span>
+  </button>
 
-    <div class="scene">
+  <!-- ══ PLAYLIST TRAY (SLIDES OUT OF RADIO TOP ON DESKTOP / MODAL ON MOBILE) ══ -->
+  <div class="playlist-tray" id="playlistTray" role="region" aria-label="Music Playlist">
+    <div class="tray-handle" id="trayHandle" role="button" tabindex="0" aria-expanded="false"
+      aria-controls="trayBody" aria-label="Toggle Playlist Tray">
+      <span>PLAYLIST · 39 TRACKS</span>
+      <svg class="tray-arrow-svg" viewBox="0 0 24 24" width="12" height="12" fill="currentColor" aria-hidden="true">
+        <path d="M12 8l-6 6 1.41 1.41L12 10.83l4.59 4.58L18 14z" />
+      </svg>
+    </div>
+    <div class="tray-body" id="trayBody" role="list">
+      <div class="mobile-tray-header">
+        <span>PLAYLIST · 39 TRACKS</span>
+        <button class="mobile-tray-close" id="mobileTrayClose" aria-label="Close Playlist">✕</button>
+      </div>
+      <div id="trackList"></div>
+    </div>
+  </div>
 
-        <!-- ══ RADIO BODY ══════════════════════════════════════════════════ -->
-        <main class="radio-body" role="region" aria-label="DARSH Cyber Radio Player">
+  <div class="scene">
 
-            <!-- Antenna -->
-            <div class="antenna-base" aria-hidden="true">
-                <div class="antenna-pole"></div>
-            </div>
+    <!-- ══ RADIO BODY ══════════════════════════════════════════════════ -->
+    <main class="radio-body" role="region" aria-label="DARSH Cyber Radio Player">
 
-            <!-- ── LEFT MINI CRT VIDEO SCREEN ── -->
-            <div class="speaker-panel" role="region" aria-label="Music Video Screen">
-                <div class="radio-tv-screen">
-                    <video id="radioVideo" class="radio-screen-video" playsinline preload="auto"></video>
-                    <div class="tv-crt-overlay" aria-hidden="true"></div>
-                </div>
-                <div class="speaker-logo" aria-hidden="true">
-                    <span class="logo-text">DARSH</span>
-                    <span class="logo-sub">CYBER.FM // v2.4</span>
-                </div>
-            </div>
+      <!-- Antenna -->
+      <div class="antenna-base" aria-hidden="true">
+        <div class="antenna-pole"></div>
+      </div>
 
-            <!-- ── CENTER PANEL ── -->
-            <div class="center-panel">
-
-                <!-- LCD frequency display -->
-                <div class="lcd-shell">
-                    <div class="lcd-screen" role="status" aria-live="polite">
-                        <div class="lcd-row">
-                            <span class="lcd-band">FM</span>
-                            <span class="lcd-freq" id="lcdFreq">98.7</span>
-                            <span class="lcd-mhz">MHz</span>
-                        </div>
-                        <div class="lcd-meta" id="lcdMeta">DARSH RADIO · READY TO PLAY</div>
-                        <span class="lcd-track-idx" id="lcdIdx" style="font-family:'JetBrains Mono',monospace;font-size:9px;color:#ff9900;letter-spacing:0.08em;">01/39</span>
-                    </div>
-                    <div class="signal-leds" id="signalLeds" aria-hidden="true">
-                        <span></span><span></span><span></span><span></span>
-                        <span></span><span></span><span></span><span></span>
-                    </div>
-                </div>
-
-                <!-- Progress bar -->
-                <div class="progress-wrap">
-                    <div class="progress-bar-bg" id="progressBg" role="slider" aria-label="Playback Position" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" tabindex="0">
-                        <div class="progress-bar-fill" id="progressFill"></div>
-                    </div>
-                    <div class="progress-time" id="progressTime" aria-label="Current Playback Time">0:00</div>
-                </div>
-
-                <!-- Tuner band -->
-                <div class="tuner-band" aria-hidden="true">
-                    <div class="tuner-scale">
-                        <span>88</span><span>92</span><span>96</span>
-                        <span>100</span><span>104</span><span>108</span>
-                    </div>
-                    <div class="tuner-track">
-                        <div class="tuner-fill"></div>
-                        <div class="tuner-indicator" id="tunerIndicator">
-                            <div class="tuner-needle-line"></div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Preset buttons + LIST button -->
-                <div class="presets-row" role="group" aria-label="Station Presets">
-                    <div class="preset-group-label" aria-hidden="true">PRESETS</div>
-                    <div class="presets-btns">
-                        <button class="preset-btn" data-freq="91.1" data-meta="DARSH CHILL · SUNSET HAZE" aria-label="Preset 1: 91.1 MHz">
-                            <span class="p-num">1</span><span class="p-freq">91.1</span>
-                        </button>
-                        <button class="preset-btn active" data-freq="98.7" data-meta="DARSH RADIO · MIDNIGHT DREAMS" aria-label="Preset 2: 98.7 MHz">
-                            <span class="p-num">2</span><span class="p-freq">98.7</span>
-                        </button>
-                        <button class="preset-btn" data-freq="103.5" data-meta="DARSH HITS · ELECTRIC FEEL" aria-label="Preset 3: 103.5 MHz">
-                            <span class="p-num">3</span><span class="p-freq">103.5</span>
-                        </button>
-                        <button class="preset-btn" data-freq="107.2" data-meta="DARSH DEEP · ABYSSAL" aria-label="Preset 4: 107.2 MHz">
-                            <span class="p-num">4</span><span class="p-freq">107.2</span>
-                        </button>
-                    </div>
-                </div>
-
-            </div>
-
-            <!-- ── RIGHT PANEL: Knobs + play ── -->
-            <div class="right-panel">
-
-                <!-- Volume knob -->
-                <div class="knob-group">
-                    <div class="knob-label" id="volLabel">VOL</div>
-                    <div class="knob-ring" role="slider" aria-labelledby="volLabel" aria-valuemin="0" aria-valuemax="100" aria-valuenow="80" tabindex="0">
-                        <div class="knob" id="volKnob">
-                            <div class="knob-marker"></div>
-                            <div class="knob-shine"></div>
-                        </div>
-                    </div>
-                    <div class="knob-ticks" aria-hidden="true">
-                        <span class="tk-l">–</span>
-                        <span class="tk-r">+</span>
-                    </div>
-                </div>
-
-                <div class="panel-divider" aria-hidden="true"></div>
-
-                <!-- Play/Stop button -->
-                <div class="play-group">
-                    <button class="play-button" id="playBtn" aria-label="Play Track" aria-pressed="false">
-                        <div class="play-led" id="playLed" aria-hidden="true"></div>
-                        <svg class="icon-play" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                            <path d="M8 5v14l11-7z" />
-                        </svg>
-                        <svg class="icon-stop" viewBox="0 0 24 24" fill="currentColor" style="display:none" aria-hidden="true">
-                            <rect x="5" y="5" width="14" height="14" rx="2" />
-                        </svg>
-                    </button>
-                    <div class="play-label" aria-hidden="true">ON / OFF</div>
-                </div>
-
-                <div class="panel-divider" aria-hidden="true"></div>
-
-                <!-- Tune knob — drag ↑ next · drag ↓ prev -->
-                <div class="knob-group">
-                    <div class="knob-label" id="tuneLabel">TUNE</div>
-                    <div class="knob-ring" role="slider" aria-labelledby="tuneLabel" aria-valuemin="1" aria-valuemax="39" aria-valuenow="1" tabindex="0">
-                        <div class="knob" id="tuneKnob">
-                            <div class="knob-marker"></div>
-                            <div class="knob-shine"></div>
-                        </div>
-                    </div>
-                    <div class="knob-ticks" aria-hidden="true">
-                        <span class="tk-l">◂</span>
-                        <span class="tk-r">▸</span>
-                    </div>
-                </div>
-
-            </div>
-
-        </main><!-- /radio-body -->
-
-        <!-- ══ Spider-Man Character Figure (Covers Gemini Logo) ══ -->
-        <div class="character-wrapper" aria-hidden="true">
-            <img src="asstes/105059-the-spider-man-into-spider-verse-png-download-free.png" alt="Spider-Man" class="spiderman-figure">
+      <!-- ── LEFT MINI CRT VIDEO SCREEN ── -->
+      <div class="speaker-panel" role="region" aria-label="Music Video Screen">
+        <div class="radio-tv-screen" id="tvScreen">
+          <video id="radioVideo" class="radio-screen-video" playsinline preload="auto"></video>
+          <div class="tv-crt-overlay" aria-hidden="true"></div>
+          <!-- Spider-Man inside Video Screen for Responsive -->
+          <div class="tv-spiderman-mini" aria-hidden="true">
+            <img src="asstes/105059-the-spider-man-into-spider-verse-png-download-free.png" alt="Spider-Man" class="tv-spiderman-img">
+          </div>
         </div>
-    </div><!-- /scene -->
+        <div class="speaker-logo" aria-hidden="true">
+          <span class="logo-text">DARSH</span>
+          <span class="logo-sub">CYBER.FM // v2.4</span>
+        </div>
+      </div>
 
-    <script>
-        // ════════════════════════════════════════════════════════════════════════════
-        // 1. PLAYLIST DATA (All 39 local tracks in asstes/music/)
-        // ════════════════════════════════════════════════════════════════════════════
-        const PLAYLIST = [
-            { id: "song-01", title: "Kun Faya Kun", artist: "A.R. Rahman, Javed Ali, Mohit Chauhan", src: "asstes/music/ROCKSTAR Kun Faya Kun (Full Video Song)  Ranbir Kapoor  A.R. Rahman, Javed Ali, Mohit Chauhan_1080p.mp4" },
-            { id: "song-02", title: "Teri Deewani", artist: "Kailash Kher", src: "asstes/music/Teri Deewani - Kailash Kher  Official Video  Kailasa  Paresh  Naresh_480p.mp4" },
-            { id: "song-03", title: "Bulleya", artist: "Papon, Vishal & Shekhar", src: "asstes/music/Bulleya  Full Song  Sultan  Salman Khan, Anushka Sharma  Papon  Vishal & Shekhar  Irshad Kamil_1080p.mp4" },
-            { id: "song-04", title: "O Rangrez", artist: "Shreya Ghoshal, Javed Bashir", src: "asstes/music/O Rangrez Full Video - Bhaag Milkha BhaagFarhan, SonamShreya Ghoshal, Javed Bashir_1080p.mp4" },
-            { id: "song-05", title: "Jugni (Bulle Shah)", artist: "Tochi Raina", src: "asstes/music/Jugni Bulle Shah Tochi Raina - with Lyrics_1080p.mp4" },
-            { id: "song-06", title: "Aaj Se Teri", artist: "Arijit Singh, Amit Trivedi", src: "asstes/music/Aaj Se Teri  Padman  Akshay Kumar & Radhika Apte  Arijit Singh  Amit Trivedi_1080p.mp4" },
-            { id: "song-07", title: "Darkhaast", artist: "Arijit Singh, Sunidhi Chauhan", src: "asstes/music/DARKHAAST Full Video Song   SHIVAAY  Arijit Singh & Sunidhi Chauhan  Ajay Devgn  T-Series_1080p.mp4" },
-            { id: "song-08", title: "Kaise Hua", artist: "Vishal Mishra", src: "asstes/music/LYRICAL Kaise Hua  Kabir Singh  Shahid K, Kiara A, Sandeep V  Vishal Mishra, Manoj Muntashir_1080p.mp4" },
-            { id: "song-09", title: "Raabta (Kehte Hain Khuda)", artist: "Arijit Singh, Pritam", src: "asstes/music/Raabta (Kehte Hain Khuda) Full Song With Lyrics  Agent Vinod  Saif Ali Khan, Kareena Kapoor,Pritam_1080p.mp4" },
-            { id: "song-10", title: "Tu Chahiye", artist: "Atif Aslam, Pritam", src: "asstes/music/Tu Chahiye FULL VIDEO Song - Atif Aslam Pritam  Bajrangi Bhaijaan  Salman Khan, Kareena Kapoor_1080p.mp4" },
-            { id: "song-11", title: "O Saathi", artist: "Atif Aslam, Arko", src: "asstes/music/O Saathi Video Song  Baaghi 2  Tiger Shroff  Disha Patani  Arko  Ahmed Khan  Sajid Nadiadwala_1080p.mp4" },
-            { id: "song-12", title: "Yeh Fitoor Mera", artist: "Arijit Singh, Amit Trivedi", src: "asstes/music/Yeh Fitoor Mera - Full Video  Fitoor  Aditya Roy Kapur, Katrina Kaif  Arijit Singh  Amit Trivedi_1080p.mp4" },
-            { id: "song-13", title: "Deewaana Deewaana", artist: "A.R. Rahman, Dhanush", src: "asstes/music/Deewaana Deewaana (Full Video) Tere Ishk Mein  Dhanush, Kriti  AR Rahman  Aanand LR  Bhushan K_1080p.mp4" },
-            { id: "song-14", title: "Tenu Sang Rakhna", artist: "Arijit Singh, Achint, Anumita", src: "asstes/music/Tenu Sang Rakhna - Full Song Audio  Jigra  Alia Bhatt  Vedang Raina  Arijit Singh,Achint,Anumita_1080p.mp4" },
-            { id: "song-15", title: "Finding Her", artist: "Kushagra, Vanshika, Bharath", src: "asstes/music/Finding Her (Jana Mere Sawalon Ka Manzar Tu)  Kushagra  Vanshika  Bharath  Karan Maini UR Debut_1080p.mp4" },
-            { id: "song-16", title: "Finding Her (Female Version)", artist: "Tanishka Bahl, Kushagra", src: "asstes/music/Finding Her (Female Version)  Tanishka Bahl  Kushagra  Bharath  Saaheal  UR Debut  New Songs_1080p.mp4" },
-            { id: "song-17", title: "Ishqa Ve", artist: "Zeeshan Ali", src: "asstes/music/Ishqa Ve - Zeeshan Ali  Yuvraj Tung  Seerat Mast  Sandeep Aulakh  Latest Punjabi Songs 2025_1080p.mp4" },
-            { id: "song-18", title: "Jhaag", artist: "Chaar Diwaari", src: "asstes/music/Chaar Diwaari - Jhaag (Official Video)  Def Jam India_1080p.mp4" },
-            { id: "song-19", title: "MERA SAMAN KAHAN HAI", artist: "Chaar Diwaari", src: "asstes/music/Chaar Diwaari - MERA SAMAN KAHAN HAI (Official Video)  TERI MAIYAT KE GAANE EP_1080p.mp4" },
-            { id: "song-20", title: "Thehra", artist: "Chaar Diwaari", src: "asstes/music/Chaar Diwaari - Thehra (Official Video)  Pyaar Diwaari Arc 1  Def Jam India_1080p.mp4" },
-            { id: "song-21", title: "FAREBI", artist: "Chaar Diwaari x Raftaar", src: "asstes/music/Chaar Diwaari X @raftaarmusic  - FAREBI (Official Video)  Pyaar Diwaari Arc 3_1080p.mp4" },
-            { id: "song-22", title: "Aashiqana", artist: "Chaar Diwaari ft. Indian Ocean, Gini", src: "asstes/music/Chaar Diwaari ft. Indian Ocean, Gini - Aashiqana  Parvana EP  Def Jam India_1080p.mp4" },
-            { id: "song-23", title: "Iss Tarah", artist: "Chaar Diwaari ft. Sonu Nigam", src: "asstes/music/Chaar Diwaari ft. Sonu Nigam - Iss Tarah  Parvana EP  Def Jam India_1080p.mp4" },
-            { id: "song-24", title: "Banda Kaam Ka", artist: "Chaar Diwaari x Sanjith Hegde", src: "asstes/music/Chaar Diwaari x Sanjith Hegde - Banda Kaam Ka (Official Video)  Parvana EP  Def Jam India_1080p.mp4" },
-            { id: "song-25", title: "Safar", artist: "Bayaan, Sherazam", src: "asstes/music/Bayaan  Sherazam - Safar_1080p.mp4" },
-            { id: "song-26", title: "Bairan", artist: "Banjaare", src: "asstes/music/Bairan – Animated Love Story  Banjaare (Official Video)_1080p.mp4" },
-            { id: "song-27", title: "HASEEN", artist: "Talwiinder, NDS, Rippy", src: "asstes/music/HASEEN - TALWIINDER, NDS, RIPPY (Official Visualizer)_1080p.mp4" },
-            { id: "song-28", title: "Jhol (Acoustic)", artist: "Maanu, Annural Khalid, Abdullah Siddiqui", src: "asstes/music/Maanu - Jhol (Acoustic)  Annural Khalid  Abdullah Siddiqui  Asfand_1080p.mp4" },
-            { id: "song-29", title: "Khat (Lyrical)", artist: "Navjot Ahuja", src: "asstes/music/Navjot Ahuja - Khat (Lyrical Video)_1080p.mp4" },
-            { id: "song-30", title: "Khat (Official Audio)", artist: "Navjot Ahuja", src: "asstes/music/Navjot Ahuja - Khat (Official Audio)_1080p.mp4" },
-            { id: "song-31", title: "Dooron Dooron (Unplugged)", artist: "Paresh Pahuja, Shiv Tandan", src: "asstes/music/Dooron Dooron (Official Video) - Unplugged  Paresh Pahuja  Shiv Tandan  T-Series_1080p.mp4" },
-            { id: "song-32", title: "Dil To Bachcha Hai Ji", artist: "Rahat Fateh Ali Khan", src: "asstes/music/Dil To Bachcha Hai Ji HD 5.1 Sound ll Ishqiya 2010 ll Rahat Fateh Ali Khan ll 4k & 1080p HD ll_1080p.mp4" },
-            { id: "song-33", title: "Zindagi Kuch Toh Bata (Reprise)", artist: "Rahat Fateh Ali Khan, Pritam", src: "asstes/music/Zindagi Kuch Toh Bata (Reprise) Full Song with LYRICS Pritam  Salman Khan  Bajrangi Bhaijaan_1080p.mp4" },
-            { id: "song-34", title: "TERI TERI YAAD", artist: "Gyanii Sangeet", src: "asstes/music/TERI TERI YAAD  GYANII SANGEET  FULL VIDEO_1080p.mp4" },
-            { id: "song-35", title: "Othaiyadi Pathayila", artist: "Dhibu Ninan Thomas, Anirudh", src: "asstes/music/Kanaa - Othaiyadi Pathayila Video  Arunraja Kamaraj  Dhibu Ninan Thomas_1080p.mp4" },
-            { id: "song-36", title: "Koodappirannor", artist: "Sooraj Santhosh, Ankit Menon", src: "asstes/music/Koodappirannor - Video  Vaazha 2  Parvatish PradeepSooraj SanthoshAnkit MenonVipin DasSavin SA_1080p.mp4" },
-            { id: "song-37", title: "12 Years", artist: "Lucky Rathore ft. PnkjOfficial", src: "asstes/music/12 Years - Lucky Rathore ft. @PnkjOfficial   Prod. Maxx Turnn  2025_1080p.mp4" },
-            { id: "song-38", title: "UDI UDI", artist: "Aneesh Poojari & Sarkar Music", src: "asstes/music/UDI UDI   @Aneesh.Poojari &_ @sarkarmusic.25  The Collective Tape  Official Music Video_1080p.mp4" },
-            { id: "song-39", title: "Darsh Midnight Frequency", artist: "Darsh Radio Special", src: "asstes/music/_1080p.mp4" }
-        ];
+      <!-- ── CENTER PANEL: LCD + Presets ── -->
+      <div class="center-panel">
 
-        // ════════════════════════════════════════════════════════════════════════════
-        // 2. LOCAL MEDIA PROVIDER (Seamless local HTML5 playback)
-        // ════════════════════════════════════════════════════════════════════════════
-        class LocalMediaProvider {
-            constructor() {
-                this.media = null;
-                this.isReady = false;
-                this.callbacks = {};
-                this.currentTrack = null;
-            }
+        <!-- LCD frequency display -->
+        <div class="lcd-shell">
+          <div class="lcd-screen" role="status" aria-live="polite">
+            <div class="lcd-row">
+              <span class="lcd-band">FM</span>
+              <span class="lcd-freq" id="lcdFreq">98.7</span>
+              <span class="lcd-mhz">MHz</span>
+            </div>
+            <div class="lcd-meta" id="lcdMeta">DARSH RADIO · READY TO PLAY</div>
+            <span class="lcd-track-idx" id="lcdIdx"
+              style="font-family:'JetBrains Mono',monospace;font-size:9px;color:#ff9900;letter-spacing:0.08em;">01/39</span>
+          </div>
 
-            init(callbacks) {
-                this.callbacks = callbacks;
-                this.media = document.getElementById('radioVideo');
-                if (!this.media) {
-                    this.media = document.createElement('video');
-                    this.media.id = 'radioVideo';
-                    this.media.playsInline = true;
-                    this.media.preload = 'auto';
-                    document.body.appendChild(this.media);
-                }
+          <!-- LCD List Button with Vector Skeuomorphic Icon -->
+          <button class="lcd-list-btn" id="lcdListBtn" aria-label="Open Playlist Drawer"
+            title="Open Playlist Drawer">
+            <svg class="deck-icon-svg" viewBox="0 0 24 24" width="13" height="13" fill="currentColor" aria-hidden="true">
+              <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z" />
+            </svg>
+            <span class="lcd-btn-text">LIST</span>
+          </button>
 
-                this.media.addEventListener('canplay', () => {
-                    if (!this.isReady) {
-                        this.isReady = true;
-                        if (this.callbacks.onReady) this.callbacks.onReady();
-                    }
-                });
+          <div class="signal-leds" id="signalLeds" aria-hidden="true">
+            <span></span><span></span><span></span><span></span>
+            <span></span><span></span><span></span><span></span>
+          </div>
+        </div>
 
-                this.media.addEventListener('play', () => {
-                    if (this.callbacks.onPlay) this.callbacks.onPlay();
-                });
+        <!-- Progress bar -->
+        <div class="progress-wrap">
+          <div class="progress-bar-bg" id="progressBg" role="slider" aria-label="Playback Position" aria-valuemin="0"
+            aria-valuemax="100" aria-valuenow="0" tabindex="0">
+            <div class="progress-bar-fill" id="progressFill"></div>
+          </div>
+          <div class="progress-time" id="progressTime" aria-label="Current Playback Time">0:00</div>
+        </div>
 
-                this.media.addEventListener('pause', () => {
-                    if (this.callbacks.onPause) this.callbacks.onPause();
-                });
+        <!-- Tuner band -->
+        <div class="tuner-band" aria-hidden="true">
+          <div class="tuner-scale">
+            <span>88</span><span>92</span><span>96</span>
+            <span>100</span><span>104</span><span>108</span>
+          </div>
+          <div class="tuner-track">
+            <div class="tuner-fill"></div>
+            <div class="tuner-indicator" id="tunerIndicator">
+              <div class="tuner-needle-line"></div>
+            </div>
+          </div>
+        </div>
 
-                this.media.addEventListener('ended', () => {
-                    if (this.callbacks.onEnd) this.callbacks.onEnd();
-                });
+        <!-- ── PRESETS / DECK BUTTONS WITH SKEUOMORPHIC VECTOR ICONS ── -->
+        <div class="presets-row" role="group" aria-label="Deck Controls">
+          <div class="preset-group-label" aria-hidden="true">DECK</div>
+          <div class="presets-btns">
+            <!-- PREVIOUS BUTTON -->
+            <button class="preset-btn" id="btnPrev" aria-label="Previous Track" title="Previous Track">
+              <svg class="deck-icon-svg" viewBox="0 0 24 24" width="12" height="12" fill="currentColor" aria-hidden="true">
+                <path d="M6 6h2v12H6zm3.5 6l8.5 6V6z" />
+              </svg>
+              <span class="p-freq">PREV</span>
+            </button>
 
-                this.media.addEventListener('waiting', () => {
-                    if (this.callbacks.onBuffering) this.callbacks.onBuffering();
-                });
+            <!-- PLAY BUTTON -->
+            <button class="preset-btn" id="btnPlay" aria-label="Play Track" title="Play Track">
+              <svg class="deck-icon-svg" viewBox="0 0 24 24" width="12" height="12" fill="currentColor" aria-hidden="true">
+                <path d="M8 5v14l11-7z" />
+              </svg>
+              <span class="p-freq">PLAY</span>
+            </button>
 
-                this.media.addEventListener('error', (e) => {
-                    console.warn('Playback error, auto-recovering:', e);
-                    if (this.callbacks.onError) this.callbacks.onError(e);
-                });
+            <!-- STOP / PAUSE BUTTON -->
+            <button class="preset-btn" id="btnStop" aria-label="Stop Track" title="Stop / Pause Track">
+              <svg class="deck-icon-svg" viewBox="0 0 24 24" width="12" height="12" fill="currentColor" aria-hidden="true">
+                <rect x="6" y="6" width="12" height="12" rx="1.5" />
+              </svg>
+              <span class="p-freq">STOP</span>
+            </button>
 
-                this.isReady = true;
-                if (this.callbacks.onReady) this.callbacks.onReady();
-            }
+            <!-- NEXT BUTTON -->
+            <button class="preset-btn" id="btnNext" aria-label="Next Track" title="Next Track">
+              <svg class="deck-icon-svg" viewBox="0 0 24 24" width="12" height="12" fill="currentColor" aria-hidden="true">
+                <path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z" />
+              </svg>
+              <span class="p-freq">NEXT</span>
+            </button>
 
-            loadTrack(track, autoPlay = true) {
-                this.currentTrack = track;
-                this.media.src = track.src;
-                this.media.load();
-                if (autoPlay) {
-                    this.media.play().catch(e => {
-                        console.log('Autoplay waiting for user interaction:', e);
-                    });
-                }
-            }
+            <!-- LOOP BUTTON -->
+            <button class="preset-btn" id="btnLoop" aria-label="Loop Track" title="Toggle Loop Mode">
+              <svg class="deck-icon-svg" viewBox="0 0 24 24" width="12" height="12" fill="currentColor" aria-hidden="true">
+                <path d="M7 7h10v3l4-4-4-4v3H5v6h2V7zm10 10H7v-3l-4 4 4 4v-3h12v-6h-2v4z" />
+              </svg>
+              <span class="p-freq">LOOP</span>
+            </button>
+          </div>
+        </div>
 
-            play() {
-                if (this.media) {
-                    this.media.play().catch(e => console.log('Play request received:', e));
-                }
-            }
+      </div>
 
-            pause() {
-                if (this.media) {
-                    this.media.pause();
-                }
-            }
+      <!-- ── RIGHT PANEL: Knobs + play ── -->
+      <div class="right-panel">
 
-            seek(seconds) {
-                if (this.media && Number.isFinite(seconds)) {
-                    this.media.currentTime = seconds;
-                }
-            }
+        <!-- Volume knob -->
+        <div class="knob-group">
+          <div class="knob-label" id="volLabel">VOL</div>
+          <div class="knob-ring" role="slider" aria-labelledby="volLabel" aria-valuemin="0" aria-valuemax="100"
+            aria-valuenow="80" tabindex="0">
+            <div class="knob" id="volKnob">
+              <div class="knob-marker"></div>
+              <div class="knob-shine"></div>
+            </div>
+          </div>
+          <div class="knob-ticks" aria-hidden="true">
+            <span class="tk-l">–</span>
+            <span class="tk-r">+</span>
+          </div>
+        </div>
 
-            setVolume(volume) {
-                if (this.media) {
-                    this.media.volume = Math.max(0, Math.min(1, volume / 100));
-                }
-            }
+        <div class="panel-divider" aria-hidden="true"></div>
 
-            getCurrentTime() {
-                return this.media ? (this.media.currentTime || 0) : 0;
-            }
+        <!-- Play/Stop button -->
+        <div class="play-group">
+          <button class="play-button" id="playBtn" aria-label="Play Track" aria-pressed="false">
+            <div class="play-led" id="playLed" aria-hidden="true"></div>
+            <svg class="icon-play" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              <path d="M8 5v14l11-7z" />
+            </svg>
+            <svg class="icon-stop" viewBox="0 0 24 24" fill="currentColor" style="display:none" aria-hidden="true">
+              <rect x="5" y="5" width="14" height="14" rx="2" />
+            </svg>
+          </button>
+          <div class="play-label" aria-hidden="true">ON / OFF</div>
+        </div>
 
-            getDuration() {
-                return this.media ? (this.media.duration || 0) : 0;
-            }
+        <div class="panel-divider" aria-hidden="true"></div>
+
+        <!-- Tune knob — drag ↑ next · drag ↓ prev -->
+        <div class="knob-group">
+          <div class="knob-label" id="tuneLabel">TUNE</div>
+          <div class="knob-ring" role="slider" aria-labelledby="tuneLabel" aria-valuemin="1" aria-valuemax="39"
+            aria-valuenow="1" tabindex="0">
+            <div class="knob" id="tuneKnob">
+              <div class="knob-marker"></div>
+              <div class="knob-shine"></div>
+            </div>
+          </div>
+          <div class="knob-ticks" aria-hidden="true">
+            <span class="tk-l">◂</span>
+            <span class="tk-r">▸</span>
+          </div>
+        </div>
+
+      </div>
+
+    </main><!-- /radio-body -->
+
+    <!-- ══ Spider-Man Character Figure (Covers Gemini Logo) ══ -->
+    <div class="character-wrapper" aria-hidden="true">
+      <img src="asstes/105059-the-spider-man-into-spider-verse-png-download-free.png" alt="Spider-Man"
+        class="spiderman-figure">
+    </div>
+  </div><!-- /scene -->
+
+  <script>
+    // ════════════════════════════════════════════════════════════════════════════
+    // 1. PLAYLIST DATA (All 39 local tracks)
+    // ════════════════════════════════════════════════════════════════════════════
+    const PLAYLIST = [
+      { id: "song-01", title: "Kun Faya Kun", artist: "A.R. Rahman, Javed Ali, Mohit Chauhan", src: "asstes/music/ROCKSTAR Kun Faya Kun (Full Video Song)  Ranbir Kapoor  A.R. Rahman, Javed Ali, Mohit Chauhan_1080p.mp4" },
+      { id: "song-02", title: "Teri Deewani", artist: "Kailash Kher", src: "asstes/music/Teri Deewani - Kailash Kher  Official Video  Kailasa  Paresh  Naresh_480p.mp4" },
+      { id: "song-03", title: "Bulleya", artist: "Papon, Vishal & Shekhar", src: "asstes/music/Bulleya  Full Song  Sultan  Salman Khan, Anushka Sharma  Papon  Vishal & Shekhar  Irshad Kamil_1080p.mp4" },
+      { id: "song-04", title: "O Rangrez", artist: "Shreya Ghoshal, Javed Bashir", src: "asstes/music/O Rangrez Full Video - Bhaag Milkha BhaagFarhan, SonamShreya Ghoshal, Javed Bashir_1080p.mp4" },
+      { id: "song-05", title: "Jugni (Bulle Shah)", artist: "Tochi Raina", src: "asstes/music/Jugni Bulle Shah Tochi Raina - with Lyrics_1080p.mp4" },
+      { id: "song-06", title: "Aaj Se Teri", artist: "Arijit Singh, Amit Trivedi", src: "asstes/music/Aaj Se Teri  Padman  Akshay Kumar & Radhika Apte  Arijit Singh  Amit Trivedi_1080p.mp4" },
+      { id: "song-07", title: "Darkhaast", artist: "Arijit Singh, Sunidhi Chauhan", src: "asstes/music/DARKHAAST Full Video Song   SHIVAAY  Arijit Singh & Sunidhi Chauhan  Ajay Devgn  T-Series_1080p.mp4" },
+      { id: "song-08", title: "Kaise Hua", artist: "Vishal Mishra", src: "asstes/music/LYRICAL Kaise Hua  Kabir Singh  Shahid K, Kiara A, Sandeep V  Vishal Mishra, Manoj Muntashir_1080p.mp4" },
+      { id: "song-09", title: "Raabta (Kehte Hain Khuda)", artist: "Arijit Singh, Pritam", src: "asstes/music/Raabta (Kehte Hain Khuda) Full Song With Lyrics  Agent Vinod  Saif Ali Khan, Kareena Kapoor,Pritam_1080p.mp4" },
+      { id: "song-10", title: "Tu Chahiye", artist: "Atif Aslam, Pritam", src: "asstes/music/Tu Chahiye FULL VIDEO Song - Atif Aslam Pritam  Bajrangi Bhaijaan  Salman Khan, Kareena Kapoor_1080p.mp4" },
+      { id: "song-11", title: "O Saathi", artist: "Atif Aslam, Arko", src: "asstes/music/O Saathi Video Song  Baaghi 2  Tiger Shroff  Disha Patani  Arko  Ahmed Khan  Sajid Nadiadwala_1080p.mp4" },
+      { id: "song-12", title: "Yeh Fitoor Mera", artist: "Arijit Singh, Amit Trivedi", src: "asstes/music/Yeh Fitoor Mera - Full Video  Fitoor  Aditya Roy Kapur, Katrina Kaif  Arijit Singh  Amit Trivedi_1080p.mp4" },
+      { id: "song-13", title: "Deewaana Deewaana", artist: "A.R. Rahman, Dhanush", src: "asstes/music/Deewaana Deewaana (Full Video) Tere Ishk Mein  Dhanush, Kriti  AR Rahman  Aanand LR  Bhushan K_1080p.mp4" },
+      { id: "song-14", title: "Tenu Sang Rakhna", artist: "Arijit Singh, Achint, Anumita", src: "asstes/music/Tenu Sang Rakhna - Full Song Audio  Jigra  Alia Bhatt  Vedang Raina  Arijit Singh,Achint,Anumita_1080p.mp4" },
+      { id: "song-15", title: "Finding Her", artist: "Kushagra, Vanshika, Bharath", src: "asstes/music/Finding Her (Jana Mere Sawalon Ka Manzar Tu)  Kushagra  Vanshika  Bharath  Karan Maini UR Debut_1080p.mp4" },
+      { id: "song-16", title: "Finding Her (Female Version)", artist: "Tanishka Bahl, Kushagra", src: "asstes/music/Finding Her (Female Version)  Tanishka Bahl  Kushagra  Bharath  Saaheal  UR Debut  New Songs_1080p.mp4" },
+      { id: "song-17", title: "Ishqa Ve", artist: "Zeeshan Ali", src: "asstes/music/Ishqa Ve - Zeeshan Ali  Yuvraj Tung  Seerat Mast  Sandeep Aulakh  Latest Punjabi Songs 2025_1080p.mp4" },
+      { id: "song-18", title: "Jhaag", artist: "Chaar Diwaari", src: "asstes/music/Chaar Diwaari - Jhaag (Official Video)  Def Jam India_1080p.mp4" },
+      { id: "song-19", title: "MERA SAMAN KAHAN HAI", artist: "Chaar Diwaari", src: "asstes/music/Chaar Diwaari - MERA SAMAN KAHAN HAI (Official Video)  TERI MAIYAT KE GAANE EP_1080p.mp4" },
+      { id: "song-20", title: "Thehra", artist: "Chaar Diwaari", src: "asstes/music/Chaar Diwaari - Thehra (Official Video)  Pyaar Diwaari Arc 1  Def Jam India_1080p.mp4" },
+      { id: "song-21", title: "FAREBI", artist: "Chaar Diwaari x Raftaar", src: "asstes/music/Chaar Diwaari X @raftaarmusic  - FAREBI (Official Video)  Pyaar Diwaari Arc 3_1080p.mp4" },
+      { id: "song-22", title: "Aashiqana", artist: "Chaar Diwaari ft. Indian Ocean, Gini", src: "asstes/music/Chaar Diwaari ft. Indian Ocean, Gini - Aashiqana  Parvana EP  Def Jam India_1080p.mp4" },
+      { id: "song-23", title: "Iss Tarah", artist: "Chaar Diwaari ft. Sonu Nigam", src: "asstes/music/Chaar Diwaari ft. Sonu Nigam - Iss Tarah  Parvana EP  Def Jam India_1080p.mp4" },
+      { id: "song-24", title: "Banda Kaam Ka", artist: "Chaar Diwaari x Sanjith Hegde", src: "asstes/music/Chaar Diwaari x Sanjith Hegde - Banda Kaam Ka (Official Video)  Parvana EP  Def Jam India_1080p.mp4" },
+      { id: "song-25", title: "Safar", artist: "Bayaan, Sherazam", src: "asstes/music/Bayaan  Sherazam - Safar_1080p.mp4" },
+      { id: "song-26", title: "Bairan", artist: "Banjaare", src: "asstes/music/Bairan – Animated Love Story  Banjaare (Official Video)_1080p.mp4" },
+      { id: "song-27", title: "HASEEN", artist: "Talwiinder, NDS, Rippy", src: "asstes/music/HASEEN - TALWIINDER, NDS, RIPPY (Official Visualizer)_1080p.mp4" },
+      { id: "song-28", title: "Jhol (Acoustic)", artist: "Maanu, Annural Khalid, Abdullah Siddiqui", src: "asstes/music/Maanu - Jhol (Acoustic)  Annural Khalid  Abdullah Siddiqui  Asfand_1080p.mp4" },
+      { id: "song-29", title: "Khat (Lyrical)", artist: "Navjot Ahuja", src: "asstes/music/Navjot Ahuja - Khat (Lyrical Video)_1080p.mp4" },
+      { id: "song-30", title: "Khat (Official Audio)", artist: "Navjot Ahuja", src: "asstes/music/Navjot Ahuja - Khat (Official Audio)_1080p.mp4" },
+      { id: "song-31", title: "Dooron Dooron (Unplugged)", artist: "Paresh Pahuja, Shiv Tandan", src: "asstes/music/Dooron Dooron (Official Video) - Unplugged  Paresh Pahuja  Shiv Tandan  T-Series_1080p.mp4" },
+      { id: "song-32", title: "Dil To Bachcha Hai Ji", artist: "Rahat Fateh Ali Khan", src: "asstes/music/Dil To Bachcha Hai Ji HD 5.1 Sound ll Ishqiya 2010 ll Rahat Fateh Ali Khan ll 4k & 1080p HD ll_1080p.mp4" },
+      { id: "song-33", title: "Zindagi Kuch Toh Bata (Reprise)", artist: "Rahat Fateh Ali Khan, Pritam", src: "asstes/music/Zindagi Kuch Toh Bata (Reprise) Full Song with LYRICS Pritam  Salman Khan  Bajrangi Bhaijaan_1080p.mp4" },
+      { id: "song-34", title: "TERI TERI YAAD", artist: "Gyanii Sangeet", src: "asstes/music/TERI TERI YAAD  GYANII SANGEET  FULL VIDEO_1080p.mp4" },
+      { id: "song-35", title: "Othaiyadi Pathayila", artist: "Dhibu Ninan Thomas, Anirudh", src: "asstes/music/Kanaa - Othaiyadi Pathayila Video  Arunraja Kamaraj  Dhibu Ninan Thomas_1080p.mp4" },
+      { id: "song-36", title: "Koodappirannor", artist: "Sooraj Santhosh, Ankit Menon", src: "asstes/music/Koodappirannor - Video  Vaazha 2  Parvatish PradeepSooraj SanthoshAnkit MenonVipin DasSavin SA_1080p.mp4" },
+      { id: "song-37", title: "12 Years", artist: "Lucky Rathore ft. PnkjOfficial", src: "asstes/music/12 Years - Lucky Rathore ft. @PnkjOfficial   Prod. Maxx Turnn  2025_1080p.mp4" },
+      { id: "song-38", title: "UDI UDI", artist: "Aneesh Poojari & Sarkar Music", src: "asstes/music/UDI UDI   @Aneesh.Poojari &_ @sarkarmusic.25  The Collective Tape  Official Music Video_1080p.mp4" },
+      { id: "song-39", title: "Darsh Midnight Frequency", artist: "Darsh Radio Special", src: "asstes/music/_1080p.mp4" }
+    ];
+
+    // ════════════════════════════════════════════════════════════════════════════
+    // 2. LOCAL MEDIA PROVIDER (Seamless local HTML5 playback)
+    // ════════════════════════════════════════════════════════════════════════════
+    class LocalMediaProvider {
+      constructor() {
+        this.media = null;
+        this.isReady = false;
+        this.callbacks = {};
+        this.currentTrack = null;
+      }
+
+      init(callbacks) {
+        this.callbacks = callbacks;
+        this.media = document.getElementById('radioVideo');
+        if (!this.media) {
+          this.media = document.createElement('video');
+          this.media.id = 'radioVideo';
+          this.media.playsInline = true;
+          this.media.preload = 'auto';
+          document.body.appendChild(this.media);
         }
 
-        // ════════════════════════════════════════════════════════════════════════════
-        // 3. CENTRAL PLAYER CONTROLLER
-        // ════════════════════════════════════════════════════════════════════════════
-        class PlayerController {
-            constructor(playlist, provider) {
-                this.playlist = playlist;
-                this.provider = provider;
-                this.currentIndex = 0;
-                this.isPlaying = false;
-                this.isReady = false;
-                this.currentTime = 0;
-                this.duration = 0;
-                this.volume = 80;
-                this.isSeeking = false;
-                this.listeners = [];
-                this.progressInterval = null;
-                this.pendingAutoplay = false;
+        this.media.addEventListener('canplay', () => {
+          if (!this.isReady) {
+            this.isReady = true;
+            if (this.callbacks.onReady) this.callbacks.onReady();
+          }
+        });
 
-                this._initProvider();
-            }
+        this.media.addEventListener('play', () => {
+          if (this.callbacks.onPlay) this.callbacks.onPlay();
+        });
 
-            _initProvider() {
-                this.provider.init({
-                    onReady: () => {
-                        this.isReady = true;
-                        this.provider.setVolume(this.volume);
-                        if (this.pendingAutoplay) {
-                            this.play();
-                            this.pendingAutoplay = false;
-                        }
-                        this._notify('ready');
-                    },
-                    onPlay: () => {
-                        this.isPlaying = true;
-                        this._startProgressTracker();
-                        this._notify('play');
-                    },
-                    onPause: () => {
-                        this.isPlaying = false;
-                        this._stopProgressTracker();
-                        this._notify('pause');
-                    },
-                    onEnd: () => {
-                        this.next(true);
-                    },
-                    onBuffering: () => {
-                        this._notify('buffering');
-                    },
-                    onError: (errCode) => {
-                        this._notify('error', errCode);
-                        setTimeout(() => this.next(true), 1500);
-                    }
-                });
-            }
+        this.media.addEventListener('pause', () => {
+          if (this.callbacks.onPause) this.callbacks.onPause();
+        });
 
-            getCurrentTrack() {
-                return this.playlist[this.currentIndex];
-            }
+        this.media.addEventListener('ended', () => {
+          if (this.callbacks.onEnd) this.callbacks.onEnd();
+        });
 
-            play() {
-                if (!this.isReady) {
-                    this.pendingAutoplay = true;
-                    return;
-                }
-                this.isPlaying = true;
-                this.provider.play();
-                this._notify('play');
-            }
+        this.media.addEventListener('waiting', () => {
+          if (this.callbacks.onBuffering) this.callbacks.onBuffering();
+        });
 
-            pause() {
-                this.isPlaying = false;
-                this.provider.pause();
-                this._notify('pause');
-            }
+        this.media.addEventListener('error', (e) => {
+          console.warn('Playback error, auto-recovering:', e);
+          if (this.callbacks.onError) this.callbacks.onError(e);
+        });
 
-            togglePlay() {
-                this.isPlaying ? this.pause() : this.play();
-            }
+        this.isReady = true;
+        if (this.callbacks.onReady) this.callbacks.onReady();
+      }
 
-            selectTrack(index, autoPlay = true) {
-                this.currentIndex = ((index % this.playlist.length) + this.playlist.length) % this.playlist.length;
-                this.currentTime = 0;
-                this.duration = 0;
-                const track = this.getCurrentTrack();
-                if (autoPlay) this.isPlaying = true;
-                this.provider.loadTrack(track, autoPlay);
-                this._notify('trackChange', track);
-            }
-
-            next(autoPlay = true) {
-                this.selectTrack(this.currentIndex + 1, autoPlay || this.isPlaying);
-            }
-
-            previous(autoPlay = true) {
-                const curTime = this.provider.getCurrentTime();
-                if (curTime > 3) {
-                    this.provider.seek(0);
-                    this.currentTime = 0;
-                    this._notify('timeUpdate', { currentTime: 0, duration: this.duration });
-                    return;
-                }
-                this.selectTrack(this.currentIndex - 1, autoPlay || this.isPlaying);
-            }
-
-            seek(seconds) {
-                this.currentTime = seconds;
-                this.provider.seek(seconds);
-                this._notify('timeUpdate', { currentTime: seconds, duration: this.duration });
-            }
-
-            setVolume(volume) {
-                this.volume = Math.max(0, Math.min(100, volume));
-                this.provider.setVolume(this.volume);
-                this._notify('volumeChange', this.volume);
-            }
-
-            _startProgressTracker() {
-                if (this.progressInterval) return;
-                const update = () => {
-                    if (this.isPlaying && !this.isSeeking) {
-                        this.currentTime = this.provider.getCurrentTime();
-                        this.duration = this.provider.getDuration();
-                        this._notify('timeUpdate', { currentTime: this.currentTime, duration: this.duration });
-                    }
-                    this.progressInterval = requestAnimationFrame(update);
-                };
-                this.progressInterval = requestAnimationFrame(update);
-            }
-
-            _stopProgressTracker() {
-                if (this.progressInterval) {
-                    cancelAnimationFrame(this.progressInterval);
-                    this.progressInterval = null;
-                }
-            }
-
-            subscribe(callback) {
-                this.listeners.push(callback);
-                return () => {
-                    this.listeners = this.listeners.filter(l => l !== callback);
-                };
-            }
-
-            _notify(event, data) {
-                this.listeners.forEach(cb => cb(event, data, this));
-            }
+      loadTrack(track, autoPlay = true) {
+        this.currentTrack = track;
+        this.media.src = track.src;
+        this.media.load();
+        if (autoPlay) {
+          this.media.play().catch(e => {
+            console.log('Autoplay waiting for user interaction:', e);
+          });
         }
+      }
 
-        // ════════════════════════════════════════════════════════════════════════════
-        // 4. UI TIME FORMATTING
-        // ════════════════════════════════════════════════════════════════════════════
-        function formatTime(seconds) {
-            if (!Number.isFinite(seconds) || seconds < 0) {
-                return "0:00";
+      play() {
+        if (this.media) {
+          this.media.play().catch(e => console.log('Play request received:', e));
+        }
+      }
+
+      pause() {
+        if (this.media) {
+          this.media.pause();
+        }
+      }
+
+      seek(seconds) {
+        if (this.media && Number.isFinite(seconds)) {
+          this.media.currentTime = seconds;
+        }
+      }
+
+      setVolume(volume) {
+        if (this.media) {
+          this.media.volume = Math.max(0, Math.min(1, volume / 100));
+        }
+      }
+
+      getCurrentTime() {
+        return this.media ? (this.media.currentTime || 0) : 0;
+      }
+
+      getDuration() {
+        return this.media ? (this.media.duration || 0) : 0;
+      }
+    }
+
+    // ════════════════════════════════════════════════════════════════════════════
+    // 3. CENTRAL PLAYER CONTROLLER
+    // ════════════════════════════════════════════════════════════════════════════
+    class PlayerController {
+      constructor(playlist, provider) {
+        this.playlist = playlist;
+        this.provider = provider;
+        this.currentIndex = 0;
+        this.isPlaying = false;
+        this.isReady = false;
+        this.currentTime = 0;
+        this.duration = 0;
+        this.volume = 80;
+        this.isSeeking = false;
+        this.isLoopMode = false;
+        this.listeners = [];
+        this.progressInterval = null;
+        this.pendingAutoplay = false;
+
+        this._initProvider();
+      }
+
+      _initProvider() {
+        this.provider.init({
+          onReady: () => {
+            this.isReady = true;
+            this.provider.setVolume(this.volume);
+            if (this.pendingAutoplay) {
+              this.play();
+              this.pendingAutoplay = false;
             }
-            const minutes = Math.floor(seconds / 60);
-            const remainingSeconds = Math.floor(seconds % 60);
-            return `${minutes}:${String(remainingSeconds).padStart(2, "0")}`;
-        }
-
-        // ════════════════════════════════════════════════════════════════════════════
-        // 5. DARSH FM UI CONTROLLER & BINDINGS
-        // ════════════════════════════════════════════════════════════════════════════
-        const localProvider = new LocalMediaProvider();
-        const playerController = new PlayerController(PLAYLIST, localProvider);
-
-        // DOM elements
-        const playBtn        = document.getElementById('playBtn');
-        const playLed        = document.getElementById('playLed');
-        const playIcon       = playBtn.querySelector('.icon-play');
-        const stopIcon       = playBtn.querySelector('.icon-stop');
-        const lcdFreq        = document.getElementById('lcdFreq');
-        const lcdMeta        = document.getElementById('lcdMeta');
-        const lcdIdx         = document.getElementById('lcdIdx');
-        const tunerIndicator = document.getElementById('tunerIndicator');
-        const signalLeds     = document.getElementById('signalLeds');
-        const volKnob        = document.getElementById('volKnob');
-        const tuneKnob       = document.getElementById('tuneKnob');
-        const progressFill   = document.getElementById('progressFill');
-        const progressBg     = document.getElementById('progressBg');
-        const progressTime   = document.getElementById('progressTime');
-
-        let vizRaf = null;
-        let volAngle = -100 + (playerController.volume / 100) * 200;
-        let tuneAngle = 0;
-        let draggingVol = false, volStartY = 0, volStartAngle = volAngle;
-        let draggingTune = false, tuneStartY = 0, tuneStartAngle = 0;
-        let tuneAccumPx = 0;
-        const PX_PER_TRACK = 28;
-
-        const stations = {
-            '91.1':  { needle: 0.07  },
-            '98.7':  { needle: 0.508 },
-            '103.5': { needle: 0.756 },
-            '107.2': { needle: 0.942 },
-        };
-
-        function updateLCD(track, idx) {
-            lcdMeta.textContent = `${track.title} · ${track.artist}`;
-            lcdIdx.textContent = `${String(idx + 1).padStart(2, '0')}/39`;
-            lcdFreq.classList.add('flicker');
-            setTimeout(() => lcdFreq.classList.remove('flicker'), 180);
-        }
-
-        function updatePlayState(isPlaying) {
-            playIcon.style.display = isPlaying ? 'none' : '';
-            stopIcon.style.display = isPlaying ? '' : 'none';
-            playBtn.setAttribute('aria-label', isPlaying ? 'Pause Track' : 'Play Track');
-            playBtn.setAttribute('aria-pressed', isPlaying ? 'true' : 'false');
-
-            if (isPlaying) {
-                playLed.classList.add('on');
-                signalLeds.classList.add('active');
-                startSignalViz();
+            this._notify('ready');
+          },
+          onPlay: () => {
+            this.isPlaying = true;
+            this._startProgressTracker();
+            this._notify('play');
+          },
+          onPause: () => {
+            this.isPlaying = false;
+            this._stopProgressTracker();
+            this._notify('pause');
+          },
+          onEnd: () => {
+            if (this.isLoopMode) {
+              this.selectTrack(this.currentIndex, true);
             } else {
-                playLed.classList.remove('on');
-                signalLeds.classList.remove('active');
-                stopSignalViz();
+              this.next(true);
             }
-        }
-
-        // Subscribe to PlayerController events
-        playerController.subscribe((event, data, ctrl) => {
-            if (event === 'play') {
-                updatePlayState(true);
-            } else if (event === 'pause') {
-                updatePlayState(false);
-            } else if (event === 'trackChange') {
-                updateLCD(data, ctrl.currentIndex);
-            } else if (event === 'timeUpdate') {
-                const { currentTime, duration } = data;
-                progressTime.textContent = formatTime(currentTime);
-                if (duration > 0) {
-                    const pct = Math.min(100, Math.max(0, (currentTime / duration) * 100));
-                    progressFill.style.width = `${pct}%`;
-                    progressBg.setAttribute('aria-valuenow', Math.round(pct));
-                }
-            } else if (event === 'error') {
-                lcdMeta.textContent = "TRACK UNAVAILABLE · AUTO SKIPPING";
-            }
+          },
+          onBuffering: () => {
+            this._notify('buffering');
+          },
+          onError: (errCode) => {
+            this._notify('error', errCode);
+            setTimeout(() => this.next(true), 1500);
+          }
         });
+      }
 
-        // ════════════════════════════════════════════════════════════════════════════
-        // 6. HARDWARE CONTROLS & BINDINGS
-        // ════════════════════════════════════════════════════════════════════════════
-        playBtn.addEventListener('click', () => {
-            playBtn.classList.add('pressed');
-            setTimeout(() => playBtn.classList.remove('pressed'), 130);
-            playerController.togglePlay();
+      getCurrentTrack() {
+        return this.playlist[this.currentIndex];
+      }
+
+      play() {
+        if (!this.isReady) {
+          this.pendingAutoplay = true;
+          return;
+        }
+        this.isPlaying = true;
+        this.provider.play();
+        this._notify('play');
+      }
+
+      pause() {
+        this.isPlaying = false;
+        this.provider.pause();
+        this._notify('pause');
+      }
+
+      togglePlay() {
+        this.isPlaying ? this.pause() : this.play();
+      }
+
+      selectTrack(index, autoPlay = true) {
+        this.currentIndex = ((index % this.playlist.length) + this.playlist.length) % this.playlist.length;
+        this.currentTime = 0;
+        this.duration = 0;
+        const track = this.getCurrentTrack();
+        if (autoPlay) this.isPlaying = true;
+        this.provider.loadTrack(track, autoPlay);
+        this._notify('trackChange', track);
+      }
+
+      next(autoPlay = true) {
+        this.selectTrack(this.currentIndex + 1, autoPlay || this.isPlaying);
+      }
+
+      previous(autoPlay = true) {
+        const curTime = this.provider.getCurrentTime();
+        if (curTime > 3) {
+          this.provider.seek(0);
+          this.currentTime = 0;
+          this._notify('timeUpdate', { currentTime: 0, duration: this.duration });
+          return;
+        }
+        this.selectTrack(this.currentIndex - 1, autoPlay || this.isPlaying);
+      }
+
+      seek(seconds) {
+        this.currentTime = seconds;
+        this.provider.seek(seconds);
+        this._notify('timeUpdate', { currentTime: seconds, duration: this.duration });
+      }
+
+      setVolume(volume) {
+        this.volume = Math.max(0, Math.min(100, volume));
+        this.provider.setVolume(this.volume);
+        this._notify('volumeChange', this.volume);
+      }
+
+      _startProgressTracker() {
+        this._stopProgressTracker();
+        const update = () => {
+          if (this.isPlaying && !this.isSeeking) {
+            this.currentTime = this.provider.getCurrentTime();
+            this.duration = this.provider.getDuration();
+            this._notify('timeUpdate', { currentTime: this.currentTime, duration: this.duration });
+          }
+          this.progressInterval = requestAnimationFrame(update);
+        };
+        this.progressInterval = requestAnimationFrame(update);
+      }
+
+      _stopProgressTracker() {
+        if (this.progressInterval) {
+          cancelAnimationFrame(this.progressInterval);
+          this.progressInterval = null;
+        }
+      }
+
+      subscribe(callback) {
+        this.listeners.push(callback);
+        return () => {
+          this.listeners = this.listeners.filter(l => l !== callback);
+        };
+      }
+
+      _notify(event, data) {
+        this.listeners.forEach(cb => cb(event, data, this));
+      }
+    }
+
+    // ════════════════════════════════════════════════════════════════════════════
+    // 4. UI TIME FORMATTING
+    // ════════════════════════════════════════════════════════════════════════════
+    function formatTime(seconds) {
+      if (!Number.isFinite(seconds) || seconds < 0) {
+        return "0:00";
+      }
+      const minutes = Math.floor(seconds / 60);
+      const remainingSeconds = Math.floor(seconds % 60);
+      return `${minutes}:${String(remainingSeconds).padStart(2, "0")}`;
+    }
+
+    // ════════════════════════════════════════════════════════════════════════════
+    // 5. DARSH FM UI CONTROLLER & BINDINGS
+    // ════════════════════════════════════════════════════════════════════════════
+    const localProvider = new LocalMediaProvider();
+    const playerController = new PlayerController(PLAYLIST, localProvider);
+
+    // DOM elements
+    const playBtn = document.getElementById('playBtn');
+    const playLed = document.getElementById('playLed');
+    const playIcon = playBtn.querySelector('.icon-play');
+    const stopIcon = playBtn.querySelector('.icon-stop');
+    const lcdFreq = document.getElementById('lcdFreq');
+    const lcdMeta = document.getElementById('lcdMeta');
+    const lcdIdx = document.getElementById('lcdIdx');
+    const tunerIndicator = document.getElementById('tunerIndicator');
+    const signalLeds = document.getElementById('signalLeds');
+    const volKnob = document.getElementById('volKnob');
+    const tuneKnob = document.getElementById('tuneKnob');
+    const progressFill = document.getElementById('progressFill');
+    const progressBg = document.getElementById('progressBg');
+    const progressTime = document.getElementById('progressTime');
+    const playlistTray = document.getElementById('playlistTray');
+    const trayHandle = document.getElementById('trayHandle');
+    const lcdListBtn = document.getElementById('lcdListBtn');
+    const trackList = document.getElementById('trackList');
+
+    // Deck Buttons: PREV, PLAY, STOP, NEXT, LOOP
+    const btnPrev = document.getElementById('btnPrev');
+    const btnPlay = document.getElementById('btnPlay');
+    const btnStop = document.getElementById('btnStop');
+    const btnNext = document.getElementById('btnNext');
+    const btnLoop = document.getElementById('btnLoop');
+
+    let trayOpen = false;
+    let vizRaf = null;
+    let volAngle = -100 + (playerController.volume / 100) * 200;
+    let tuneAngle = 0;
+    let draggingVol = false, volStartY = 0, volStartAngle = volAngle;
+    let draggingTune = false, tuneStartY = 0, tuneStartAngle = 0;
+    let tuneAccumPx = 0;
+    const PX_PER_TRACK = 28;
+
+    // Render Playlist
+    function renderPlaylist() {
+      trackList.innerHTML = '';
+      PLAYLIST.forEach((track, i) => {
+        const item = document.createElement('div');
+        const isCurrent = i === playerController.currentIndex;
+        item.className = 'track-item' + (isCurrent ? ' active' : '');
+        item.setAttribute('role', 'listitem');
+        item.setAttribute('tabindex', '0');
+        item.setAttribute('aria-label', `Track ${i + 1}: ${track.title} by ${track.artist}`);
+        item.innerHTML = `
+          <span class="track-num">${String(i + 1).padStart(2, '0')}</span>
+          <div class="cd-disc" aria-hidden="true"></div>
+          <div class="track-info">
+            <div class="track-title">${track.title}</div>
+            <div class="track-artist">${track.artist}</div>
+          </div>
+          <span class="track-play-icon" aria-hidden="true">
+            ${isCurrent && playerController.isPlaying ? `
+              <svg viewBox="0 0 24 24" width="10" height="10" fill="currentColor">
+                <path d="M8 5v14l11-7z"/>
+              </svg>
+            ` : '·'}
+          </span>
+        `;
+        item.addEventListener('click', () => {
+          playerController.selectTrack(i, true);
         });
-
-        // Progress bar seeking
-        function seekFromPointer(clientX) {
-            const rect = progressBg.getBoundingClientRect();
-            const pct = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
-            const dur = playerController.duration || playerController.provider.getDuration() || 0;
-            if (dur > 0) {
-                playerController.seek(pct * dur);
-            }
-        }
-
-        progressBg.addEventListener('click', e => seekFromPointer(e.clientX));
-
-        // Volume knob
-        function setKnobRotation(el, deg) { el.style.transform = `rotate(${deg}deg)`; }
-        setKnobRotation(volKnob, volAngle);
-        setKnobRotation(tuneKnob, tuneAngle);
-
-        function startVol(clientY) {
-            draggingVol = true;
-            volStartY = clientY;
-            volStartAngle = volAngle;
-            document.body.style.cursor = 'ns-resize';
-        }
-        function moveVol(clientY) {
-            if (!draggingVol) return;
-            const delta = (volStartY - clientY) * 1.5;
-            volAngle = Math.max(-100, Math.min(100, volStartAngle + delta));
-            const vol = Math.round((volAngle + 100) / 2);
-            setKnobRotation(volKnob, volAngle);
-            playerController.setVolume(vol);
-        }
-        function endVol() {
-            if (draggingVol) { draggingVol = false; document.body.style.cursor = ''; }
-        }
-
-        volKnob.parentElement.addEventListener('mousedown', e => startVol(e.clientY));
-        window.addEventListener('mousemove', e => moveVol(e.clientY));
-        window.addEventListener('mouseup', endVol);
-        volKnob.parentElement.addEventListener('touchstart', e => {
-            if (e.touches.length) startVol(e.touches[0].clientY);
-        }, { passive: true });
-        window.addEventListener('touchmove', e => {
-            if (draggingVol && e.touches.length) moveVol(e.touches[0].clientY);
-        }, { passive: true });
-        window.addEventListener('touchend', endVol);
-
-        // Tuning knob
-        function startTune(clientY) {
-            draggingTune = true;
-            tuneStartY = clientY;
-            tuneStartAngle = tuneAngle;
-            tuneAccumPx = 0;
-            document.body.style.cursor = 'ns-resize';
-        }
-        function moveTune(clientY) {
-            if (!draggingTune) return;
-            const rawDeltaPx = tuneStartY - clientY;
-            tuneAngle = tuneStartAngle + rawDeltaPx * 1.5;
-            setKnobRotation(tuneKnob, tuneAngle);
-
-            const raw = ((tuneAngle % 360) + 360) % 360;
-            tunerIndicator.style.left = `${(raw / 360) * 100}%`;
-            lcdFreq.textContent = (87.5 + (raw / 360) * (108 - 87.5)).toFixed(1);
-
-            const steps = Math.floor(rawDeltaPx / PX_PER_TRACK);
-            const needed = steps - Math.round(tuneAccumPx / PX_PER_TRACK);
-            if (needed > 0) {
-                playerController.next();
-                tuneAccumPx += PX_PER_TRACK;
-            } else if (needed < 0) {
-                playerController.previous();
-                tuneAccumPx -= PX_PER_TRACK;
-            }
-        }
-        function endTune() {
-            if (draggingTune) { draggingTune = false; document.body.style.cursor = ''; }
-        }
-
-        tuneKnob.parentElement.addEventListener('mousedown', e => startTune(e.clientY));
-        window.addEventListener('mousemove', e => moveTune(e.clientY));
-        window.addEventListener('mouseup', endTune);
-        tuneKnob.parentElement.addEventListener('touchstart', e => {
-            if (e.touches.length) startTune(e.touches[0].clientY);
-        }, { passive: true });
-        window.addEventListener('touchmove', e => {
-            if (draggingTune && e.touches.length) moveTune(e.touches[0].clientY);
-        }, { passive: true });
-        window.addEventListener('touchend', endTune);
-
-        // Station Presets
-        document.querySelectorAll('.preset-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                btn.classList.add('pressed');
-                setTimeout(() => btn.classList.remove('pressed'), 120);
-                document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-                const freq = btn.dataset.freq;
-                const s = stations[freq];
-                animateFreq(parseFloat(lcdFreq.textContent), parseFloat(freq));
-                tunerIndicator.style.left = `${s.needle * 100}%`;
-                tuneAngle = s.needle * 360;
-                setKnobRotation(tuneKnob, tuneAngle);
-                lcdFreq.classList.add('flicker');
-                setTimeout(() => lcdFreq.classList.remove('flicker'), 180);
-            });
+        item.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            playerController.selectTrack(i, true);
+          }
         });
-        tunerIndicator.style.left = `${stations['98.7'].needle * 100}%`;
+        trackList.appendChild(item);
+      });
+    }
 
-        function animateFreq(from, to) {
-            const dur = 350, start = performance.now();
-            (function step(now) {
-                const t = Math.min((now - start) / dur, 1);
-                const e = 1 - Math.pow(1 - t, 3);
-                lcdFreq.textContent = (from + (to - from) * e).toFixed(1);
-                if (t < 1) requestAnimationFrame(step);
-            })(performance.now());
-        }
+    function updateLCD(track, idx) {
+      lcdMeta.textContent = `${track.title} · ${track.artist}`;
+      lcdIdx.textContent = `${String(idx + 1).padStart(2, '0')}/39`;
+      lcdFreq.classList.add('flicker');
+      setTimeout(() => lcdFreq.classList.remove('flicker'), 180);
 
-        // LED Visualizer
-        function startSignalViz() {
-            if (vizRaf) return;
-            (function frame() {
-                const leds = document.querySelectorAll('.signal-leds span');
-                const count = leds.length;
-                const t = performance.now() / 1000;
-                const amp = Math.sin(t * 3.1) * 0.35 + Math.sin(t * 7.3) * 0.2 + 0.6;
-                const active = Math.round(amp * count);
-                leds.forEach((s, i) => {
-                    s.classList.toggle('lit', i < active);
-                    s.classList.toggle('peak', i === count - 1 && active === count);
-                });
-                vizRaf = requestAnimationFrame(frame);
-            })();
+      // Update active state in playlist tray
+      const items = trackList.querySelectorAll('.track-item');
+      items.forEach((item, i) => {
+        const isCurrent = i === idx;
+        item.classList.toggle('active', isCurrent);
+        const icon = item.querySelector('.track-play-icon');
+        if (icon) {
+          icon.innerHTML = isCurrent && playerController.isPlaying ? `
+            <svg viewBox="0 0 24 24" width="10" height="10" fill="currentColor">
+              <path d="M8 5v14l11-7z"/>
+            </svg>
+          ` : '·';
         }
-        function stopSignalViz() {
-            if (vizRaf) { cancelAnimationFrame(vizRaf); vizRaf = null; }
-            document.querySelectorAll('.signal-leds span').forEach(s => s.classList.remove('lit', 'peak'));
-        }
+      });
+    }
 
-        // ════════════════════════════════════════════════════════════════════════════
-        // 7. INITIALIZE APP
-        // ════════════════════════════════════════════════════════════════════════════
-        playerController.selectTrack(0, false);
-        const initialTrack = playerController.getCurrentTrack();
-        lcdMeta.textContent = `${initialTrack.title} · ${initialTrack.artist}`;
-        lcdIdx.textContent = `01/39`;
+    function updatePlayState(isPlaying) {
+      playIcon.style.display = isPlaying ? 'none' : '';
+      stopIcon.style.display = isPlaying ? '' : 'none';
+      playBtn.setAttribute('aria-label', isPlaying ? 'Pause Track' : 'Play Track');
+      playBtn.setAttribute('aria-pressed', isPlaying ? 'true' : 'false');
 
-        // Ambient background video loop — smooth and relaxed 0.75x speed
-        const bgVideo = document.querySelector('.bg-video');
-        if (bgVideo) {
-            bgVideo.defaultPlaybackRate = 0.75;
-            bgVideo.playbackRate = 0.75;
-            bgVideo.addEventListener('loadedmetadata', () => { bgVideo.playbackRate = 0.75; });
-            bgVideo.addEventListener('play', () => { bgVideo.playbackRate = 0.75; });
+      // Highlight deck PLAY / STOP buttons
+      if (btnPlay) btnPlay.classList.toggle('active', isPlaying);
+      if (btnStop) btnStop.classList.toggle('active', !isPlaying);
+
+      if (isPlaying) {
+        playLed.classList.add('on');
+        signalLeds.classList.add('active');
+        startSignalViz();
+      } else {
+        playLed.classList.remove('on');
+        signalLeds.classList.remove('active');
+        stopSignalViz();
+      }
+
+      // Update active icon in playlist tray
+      const activeIcon = trackList.querySelector('.track-item.active .track-play-icon');
+      if (activeIcon) {
+        activeIcon.innerHTML = isPlaying ? `
+          <svg viewBox="0 0 24 24" width="10" height="10" fill="currentColor">
+            <path d="M8 5v14l11-7z"/>
+          </svg>
+        ` : '·';
+      }
+    }
+
+    // Subscribe to PlayerController events
+    playerController.subscribe((event, data, ctrl) => {
+      if (event === 'play') {
+        updatePlayState(true);
+      } else if (event === 'pause') {
+        updatePlayState(false);
+      } else if (event === 'trackChange') {
+        updateLCD(data, ctrl.currentIndex);
+      } else if (event === 'timeUpdate') {
+        const { currentTime, duration } = data;
+        progressTime.textContent = formatTime(currentTime);
+        if (duration > 0) {
+          const pct = Math.min(100, Math.max(0, (currentTime / duration) * 100));
+          progressFill.style.width = `${pct}%`;
+          progressBg.setAttribute('aria-valuenow', Math.round(pct));
         }
-        const radioBodyEl = document.querySelector('.radio-body');
-        if (radioBodyEl) {
-            radioBodyEl.animate([
-                { opacity: 0, transform: 'translateY(40px) scale(0.97)' },
-                { opacity: 1, transform: 'translateY(0) scale(1)' }
-            ], { duration: 650, easing: 'cubic-bezier(0.16, 1, 0.3, 1)', fill: 'forwards' });
-        }
-    </script>
+      } else if (event === 'error') {
+        lcdMeta.textContent = "TRACK UNAVAILABLE · AUTO SKIPPING";
+      }
+    });
+
+    // ════════════════════════════════════════════════════════════════════════════
+    // 6. HARDWARE CONTROLS & BINDINGS
+    // ════════════════════════════════════════════════════════════════════════════
+    playBtn.addEventListener('click', () => {
+      playBtn.classList.add('pressed');
+      setTimeout(() => playBtn.classList.remove('pressed'), 130);
+      playerController.togglePlay();
+    });
+
+    // Deck Mechanical Buttons: PREV, PLAY, STOP, NEXT, LOOP
+    if (btnPrev) {
+      btnPrev.addEventListener('click', () => {
+        btnPrev.classList.add('pressed');
+        setTimeout(() => btnPrev.classList.remove('pressed'), 120);
+        playerController.previous();
+      });
+    }
+
+    if (btnPlay) {
+      btnPlay.addEventListener('click', () => {
+        btnPlay.classList.add('pressed');
+        setTimeout(() => btnPlay.classList.remove('pressed'), 120);
+        playerController.play();
+      });
+    }
+
+    if (btnStop) {
+      btnStop.addEventListener('click', () => {
+        btnStop.classList.add('pressed');
+        setTimeout(() => btnStop.classList.remove('pressed'), 120);
+        playerController.pause();
+      });
+    }
+
+    if (btnNext) {
+      btnNext.addEventListener('click', () => {
+        btnNext.classList.add('pressed');
+        setTimeout(() => btnNext.classList.remove('pressed'), 120);
+        playerController.next();
+      });
+    }
+
+    if (btnLoop) {
+      btnLoop.addEventListener('click', () => {
+        btnLoop.classList.add('pressed');
+        setTimeout(() => btnLoop.classList.remove('pressed'), 120);
+        playerController.isLoopMode = !playerController.isLoopMode;
+        btnLoop.classList.toggle('active', playerController.isLoopMode);
+      });
+    }
+
+    // Progress bar seeking
+    function seekFromPointer(clientX) {
+      const rect = progressBg.getBoundingClientRect();
+      const pct = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
+      const dur = playerController.duration || playerController.provider.getDuration() || 0;
+      if (dur > 0) {
+        playerController.seek(pct * dur);
+      }
+    }
+
+    progressBg.addEventListener('click', e => seekFromPointer(e.clientX));
+
+    // Volume knob
+    function setKnobRotation(el, deg) { el.style.transform = `rotate(${deg}deg)`; }
+    setKnobRotation(volKnob, volAngle);
+    setKnobRotation(tuneKnob, tuneAngle);
+
+    function startVol(clientY) {
+      draggingVol = true;
+      volStartY = clientY;
+      volStartAngle = volAngle;
+      document.body.style.cursor = 'ns-resize';
+    }
+    function moveVol(clientY) {
+      if (!draggingVol) return;
+      const delta = (volStartY - clientY) * 1.5;
+      volAngle = Math.max(-100, Math.min(100, volStartAngle + delta));
+      const vol = Math.round((volAngle + 100) / 2);
+      setKnobRotation(volKnob, volAngle);
+      playerController.setVolume(vol);
+    }
+    function endVol() {
+      if (draggingVol) { draggingVol = false; document.body.style.cursor = ''; }
+    }
+
+    volKnob.parentElement.addEventListener('mousedown', e => startVol(e.clientY));
+    window.addEventListener('mousemove', e => moveVol(e.clientY));
+    window.addEventListener('mouseup', endVol);
+    volKnob.parentElement.addEventListener('touchstart', e => {
+      if (e.touches.length) startVol(e.touches[0].clientY);
+    }, { passive: true });
+    window.addEventListener('touchmove', e => {
+      if (draggingVol && e.touches.length) moveVol(e.touches[0].clientY);
+    }, { passive: true });
+    window.addEventListener('touchend', endVol);
+
+    // Tuning knob
+    function startTune(clientY) {
+      draggingTune = true;
+      tuneStartY = clientY;
+      tuneStartAngle = tuneAngle;
+      tuneAccumPx = 0;
+      document.body.style.cursor = 'ns-resize';
+    }
+    function moveTune(clientY) {
+      if (!draggingTune) return;
+      const rawDeltaPx = tuneStartY - clientY;
+      tuneAngle = tuneStartAngle + rawDeltaPx * 1.5;
+      setKnobRotation(tuneKnob, tuneAngle);
+
+      const raw = ((tuneAngle % 360) + 360) % 360;
+      tunerIndicator.style.left = `${(raw / 360) * 100}%`;
+      lcdFreq.textContent = (87.5 + (raw / 360) * (108 - 87.5)).toFixed(1);
+
+      const steps = Math.floor(rawDeltaPx / PX_PER_TRACK);
+      const needed = steps - Math.round(tuneAccumPx / PX_PER_TRACK);
+      if (needed > 0) {
+        playerController.next();
+        tuneAccumPx += PX_PER_TRACK;
+      } else if (needed < 0) {
+        playerController.previous();
+        tuneAccumPx -= PX_PER_TRACK;
+      }
+    }
+    function endTune() {
+      if (draggingTune) { draggingTune = false; document.body.style.cursor = ''; }
+    }
+
+    tuneKnob.parentElement.addEventListener('mousedown', e => startTune(e.clientY));
+    window.addEventListener('mousemove', e => moveTune(e.clientY));
+    window.addEventListener('mouseup', endTune);
+    tuneKnob.parentElement.addEventListener('touchstart', e => {
+      if (e.touches.length) startTune(e.touches[0].clientY);
+    }, { passive: true });
+    window.addEventListener('touchmove', e => {
+      if (draggingTune && e.touches.length) moveTune(e.touches[0].clientY);
+    }, { passive: true });
+    window.addEventListener('touchend', endTune);
+
+    // Toggle Playlist Drawer
+    function toggleDrawer() {
+      trayOpen = !trayOpen;
+      playlistTray.classList.toggle('open', trayOpen);
+      trayHandle.setAttribute('aria-expanded', trayOpen ? 'true' : 'false');
+      if (lcdListBtn) {
+        lcdListBtn.classList.toggle('active', trayOpen);
+        lcdListBtn.classList.add('pressed');
+        setTimeout(() => lcdListBtn.classList.remove('pressed'), 120);
+      }
+      if (trayOpen) {
+        setTimeout(() => {
+          const active = trackList.querySelector('.track-item.active');
+          if (active) active.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+        }, 80);
+      }
+    }
+
+    trayHandle.addEventListener('click', toggleDrawer);
+    trayHandle.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleDrawer(); }
+    });
+    if (lcdListBtn) lcdListBtn.addEventListener('click', toggleDrawer);
+
+    const mobilePlaylistToggle = document.getElementById('mobilePlaylistToggle');
+    if (mobilePlaylistToggle) {
+      mobilePlaylistToggle.addEventListener('click', () => {
+        mobilePlaylistToggle.classList.add('pressed');
+        setTimeout(() => mobilePlaylistToggle.classList.remove('pressed'), 120);
+        toggleDrawer();
+      });
+    }
+
+    const mobileTrayClose = document.getElementById('mobileTrayClose');
+    if (mobileTrayClose) {
+      mobileTrayClose.addEventListener('click', toggleDrawer);
+    }
+
+    // LED Visualizer
+    function startSignalViz() {
+      if (vizRaf) return;
+      (function frame() {
+        const leds = document.querySelectorAll('.signal-leds span');
+        const count = leds.length;
+        const t = performance.now() / 1000;
+        const amp = Math.sin(t * 3.1) * 0.35 + Math.sin(t * 7.3) * 0.2 + 0.6;
+        const active = Math.round(amp * count);
+        leds.forEach((s, i) => {
+          s.classList.toggle('lit', i < active);
+          s.classList.toggle('peak', i === count - 1 && active === count);
+        });
+        vizRaf = requestAnimationFrame(frame);
+      })();
+    }
+    function stopSignalViz() {
+      if (vizRaf) { cancelAnimationFrame(vizRaf); vizRaf = null; }
+      document.querySelectorAll('.signal-leds span').forEach(s => s.classList.remove('lit', 'peak'));
+    }
+
+    // ════════════════════════════════════════════════════════════════════════════
+    // 7. INITIALIZE APP
+    // ════════════════════════════════════════════════════════════════════════════
+    renderPlaylist();
+    playerController.selectTrack(0, false);
+    const initialTrack = playerController.getCurrentTrack();
+    lcdMeta.textContent = `${initialTrack.title} · ${initialTrack.artist}`;
+    lcdIdx.textContent = `01/39`;
+
+    // Ambient background video loop — smooth and relaxed 0.75x speed
+    const bgVideo = document.querySelector('.bg-video');
+    if (bgVideo) {
+      bgVideo.defaultPlaybackRate = 0.75;
+      bgVideo.playbackRate = 0.75;
+      bgVideo.addEventListener('loadedmetadata', () => { bgVideo.playbackRate = 0.75; });
+      bgVideo.addEventListener('play', () => { bgVideo.playbackRate = 0.75; });
+    }
+    const radioBodyEl = document.querySelector('.radio-body');
+    if (radioBodyEl) {
+      radioBodyEl.animate([
+        { opacity: 0, transform: 'translateY(40px) scale(0.97)' },
+        { opacity: 1, transform: 'translateY(0) scale(1)' }
+      ], { duration: 650, easing: 'cubic-bezier(0.16, 1, 0.3, 1)', fill: 'forwards' });
+    }
+
+
+
+</script>
 </body>
 
 </html>
