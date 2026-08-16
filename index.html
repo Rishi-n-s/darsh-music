@@ -40,13 +40,21 @@
     <source src="asstes/dont_move_focus_from_the_boy_i.mp4" type="video/mp4">
   </video>
 
-  <!-- ══ FLOATING PLAYLIST TOGGLE (MOBILE / RESPONSIVE) ══ -->
-  <button class="mobile-playlist-toggle" id="mobilePlaylistToggle" aria-label="Toggle Playlist" title="Toggle Playlist">
-    <svg class="deck-icon-svg" viewBox="0 0 24 24" width="13" height="13" fill="currentColor" aria-hidden="true">
-      <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z" />
-    </svg>
-    <span>PLAYLIST</span>
-  </button>
+  <!-- ══ TOP FLOATING CONTROLS: INSTALL APP & PLAYLIST TOGGLE ══ -->
+  <div class="top-floating-bar">
+    <button class="floating-action-btn install-pwa-btn" id="pwaInstallBtn" aria-label="Add to Home Screen / Install App" title="Add to Home Screen / Install App" style="display: none;">
+      <svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor" aria-hidden="true">
+        <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/>
+      </svg>
+      <span>INSTALL APP</span>
+    </button>
+    <button class="mobile-playlist-toggle" id="mobilePlaylistToggle" aria-label="Toggle Playlist" title="Toggle Playlist">
+      <svg class="deck-icon-svg" viewBox="0 0 24 24" width="13" height="13" fill="currentColor" aria-hidden="true">
+        <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z" />
+      </svg>
+      <span>PLAYLIST</span>
+    </button>
+  </div>
 
   <!-- ══ PLAYLIST TRAY (SLIDES OUT OF RADIO TOP ON DESKTOP / MODAL ON MOBILE) ══ -->
   <div class="playlist-tray" id="playlistTray" role="region" aria-label="Music Playlist">
@@ -79,6 +87,13 @@
       <!-- ── LEFT MINI CRT VIDEO SCREEN ── -->
       <div class="speaker-panel" role="region" aria-label="Music Video Screen">
         <div class="radio-tv-screen" id="tvScreen">
+          <!-- Picture-in-Picture Float Button -->
+          <button class="crt-pip-btn" id="pipBtn" aria-label="Float Video (Picture-in-Picture)" title="Float Video Above Other Apps">
+            <svg viewBox="0 0 24 24" width="11" height="11" fill="currentColor">
+              <path d="M19 7h-8v6h8V7zm2-4H3c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h18c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H3V5h18v14z"/>
+            </svg>
+            <span>FLOAT</span>
+          </button>
           <div id="yt-player-wrap" class="yt-player-wrap">
             <div id="yt-player"></div>
           </div>
@@ -832,18 +847,48 @@
           <svg viewBox="0 0 24 24" width="10" height="10" fill="currentColor">
             <path d="M8 5v14l11-7z"/>
           </svg>
-        ` : '·';
+    // Web MediaSession API for Background Audio & Lock Screen Playback
+    function updateMediaSession(track, isPlaying = true) {
+      if ('mediaSession' in navigator && track) {
+        try {
+          navigator.mediaSession.metadata = new MediaMetadata({
+            title: track.title,
+            artist: track.artist,
+            album: 'DARSH RETRO RADIO',
+            artwork: [
+              { src: 'asstes/105059-the-spider-man-into-spider-verse-png-download-free.png', sizes: '512x512', type: 'image/png' }
+            ]
+          });
+
+          navigator.mediaSession.playbackState = isPlaying ? 'playing' : 'paused';
+
+          navigator.mediaSession.setActionHandler('play', () => playerController.play());
+          navigator.mediaSession.setActionHandler('pause', () => playerController.pause());
+          navigator.mediaSession.setActionHandler('previoustrack', () => playerController.previous());
+          navigator.mediaSession.setActionHandler('nexttrack', () => playerController.next());
+          navigator.mediaSession.setActionHandler('seekto', (details) => {
+            if (details.seekTime !== null && details.seekTime !== undefined) {
+              playerController.seek(details.seekTime);
+            }
+          });
+        } catch (err) {
+          console.warn('MediaSession handler:', err);
+        }
       }
     }
 
     // Subscribe to PlayerController events
     playerController.subscribe((event, data, ctrl) => {
+      const curTrack = ctrl.getCurrentTrack();
       if (event === 'play') {
         updatePlayState(true);
+        updateMediaSession(curTrack, true);
       } else if (event === 'pause') {
         updatePlayState(false);
+        updateMediaSession(curTrack, false);
       } else if (event === 'trackChange') {
         updateLCD(data, ctrl.currentIndex);
+        updateMediaSession(data, ctrl.isPlaying);
       } else if (event === 'timeUpdate') {
         const { currentTime, duration } = data;
         progressTime.textContent = formatTime(currentTime);
@@ -851,6 +896,15 @@
           const pct = Math.min(100, Math.max(0, (currentTime / duration) * 100));
           progressFill.style.width = `${pct}%`;
           progressBg.setAttribute('aria-valuenow', Math.round(pct));
+          if ('mediaSession' in navigator && typeof navigator.mediaSession.setPositionState === 'function') {
+            try {
+              navigator.mediaSession.setPositionState({
+                duration: Math.max(duration, 0.1),
+                playbackRate: 1.0,
+                position: Math.min(Math.max(currentTime, 0), duration)
+              });
+            } catch (e) {}
+          }
         }
       } else if (event === 'error') {
         lcdMeta.textContent = "TRACK UNAVAILABLE · AUTO SKIPPING";
@@ -1094,6 +1148,56 @@
         navigator.serviceWorker.register('./sw.js')
           .then(reg => console.log('Darsh Radio Offline Service Worker active:', reg.scope))
           .catch(err => console.warn('Service Worker registration:', err));
+      });
+    }
+
+    // ══ PWA "ADD TO HOME SCREEN / INSTALL APP" PROMPT ══
+    let deferredInstallPrompt = null;
+    const pwaInstallBtn = document.getElementById('pwaInstallBtn');
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredInstallPrompt = e;
+      if (pwaInstallBtn) {
+        pwaInstallBtn.style.display = 'flex';
+      }
+    });
+
+    if (pwaInstallBtn) {
+      pwaInstallBtn.addEventListener('click', async () => {
+        if (!deferredInstallPrompt) {
+          alert('To install, open your browser menu (or Share button on iOS Safari) and select "Add to Home Screen".');
+          return;
+        }
+        deferredInstallPrompt.prompt();
+        const { outcome } = await deferredInstallPrompt.userChoice;
+        if (outcome === 'accepted') {
+          pwaInstallBtn.style.display = 'none';
+        }
+        deferredInstallPrompt = null;
+      });
+    }
+
+    window.addEventListener('appinstalled', () => {
+      if (pwaInstallBtn) pwaInstallBtn.style.display = 'none';
+      deferredInstallPrompt = null;
+    });
+
+    // ══ PICTURE-IN-PICTURE (FLOAT VIDEO ABOVE OTHER APPS) ══
+    const pipBtn = document.getElementById('pipBtn');
+    if (pipBtn) {
+      pipBtn.addEventListener('click', async (e) => {
+        e.stopPropagation();
+        try {
+          const video = document.getElementById('radioVideo');
+          if (document.pictureInPictureElement) {
+            await document.exitPictureInPicture();
+          } else if (video && video.requestPictureInPicture) {
+            await video.requestPictureInPicture();
+          }
+        } catch (err) {
+          console.warn('Picture-in-Picture event:', err);
+        }
       });
     }
   </script>

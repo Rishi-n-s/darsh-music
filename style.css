@@ -1265,13 +1265,19 @@ body {
     }
 }
 
-/* ══ FLOATING MOBILE PLAYLIST TOGGLE BUTTON ═══════════════════════════════ */
-.mobile-playlist-toggle {
-    display: none;
+/* ══ TOP FLOATING BAR (INSTALL APP + PLAYLIST) ════════════════════════════ */
+.top-floating-bar {
     position: fixed;
     top: 14px;
     right: 14px;
     z-index: 35;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.floating-action-btn,
+.mobile-playlist-toggle {
     font-family: 'JetBrains Mono', monospace;
     font-size: 8px;
     font-weight: 800;
@@ -1286,12 +1292,38 @@ body {
         0 1px 0 #ffffff,
         inset 0 1px 0 #ffffff;
     cursor: pointer;
+    display: flex;
     align-items: center;
     gap: 6px;
-    transition: transform 0.1s ease, box-shadow 0.1s ease, background 0.15s;
+    transition: transform 0.1s ease, box-shadow 0.1s ease, background 0.15s, color 0.15s;
     outline: none;
     user-select: none;
     touch-action: manipulation;
+}
+
+.install-pwa-btn {
+    background: linear-gradient(180deg, #ff9429 0%, #e65c00 100%);
+    color: #ffffff;
+    border: 1.5px solid #ffaa44;
+    box-shadow: 0 4px 14px rgba(230, 92, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+    animation: pwaGlow 2.5s ease-in-out infinite alternate;
+}
+
+@keyframes pwaGlow {
+    0% { box-shadow: 0 4px 12px rgba(230, 92, 0, 0.35); }
+    100% { box-shadow: 0 4px 18px rgba(255, 140, 20, 0.65), 0 0 12px rgba(255, 170, 40, 0.4); }
+}
+
+.install-pwa-btn:hover {
+    background: linear-gradient(180deg, #ffa347 0%, #f06a00 100%);
+    color: #ffffff;
+}
+
+.mobile-playlist-toggle {
+    display: none;
+    position: relative;
+    top: auto;
+    right: auto;
 }
 
 .mobile-playlist-toggle:hover {
@@ -1300,9 +1332,47 @@ body {
 }
 
 .mobile-playlist-toggle.pressed,
-.mobile-playlist-toggle:active {
+.mobile-playlist-toggle:active,
+.floating-action-btn.pressed,
+.floating-action-btn:active {
     transform: translateY(2px);
     box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4), inset 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+/* ══ CRT PICTURE-IN-PICTURE (FLOAT ABOVE APPS) BUTTON ═════════════════════ */
+.crt-pip-btn {
+    position: absolute;
+    top: 6px;
+    left: 6px;
+    z-index: 5;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(4px);
+    border: 1px solid rgba(255, 170, 34, 0.45);
+    border-radius: 4px;
+    color: #ffaa22;
+    padding: 3px 6px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 8px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    transition: all 0.15s ease;
+    opacity: 0.85;
+}
+
+.crt-pip-btn:hover {
+    opacity: 1;
+    background: rgba(255, 140, 0, 0.35);
+    border-color: #ffaa22;
+    box-shadow: 0 0 8px rgba(255, 170, 34, 0.5);
+}
+
+.crt-pip-btn svg {
+    width: 10px;
+    height: 10px;
 }
 
 .mobile-tray-header {
