@@ -172,6 +172,9 @@ body {
         0 0 32px rgba(255, 140, 20, 0.2);
 
     border: 1.5px solid #d4c0a5;
+    
+    transform-origin: center bottom;
+    transform: scale(clamp(1, calc(95vw / 940), 1.5));
 }
 
 /* Subtle warm sunburst grain texture */
@@ -1375,6 +1378,42 @@ body {
     height: 10px;
 }
 
+/* ══ CRT FULLSCREEN BUTTON ════════════════════════════════════════════════ */
+.crt-full-btn {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    z-index: 5;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(4px);
+    border: 1px solid rgba(255, 170, 34, 0.45);
+    border-radius: 4px;
+    color: #ffaa22;
+    padding: 3px 6px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 8px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    transition: all 0.15s ease;
+    opacity: 0.85;
+}
+
+.crt-full-btn:hover {
+    opacity: 1;
+    background: rgba(255, 140, 0, 0.35);
+    border-color: #ffaa22;
+    box-shadow: 0 0 8px rgba(255, 170, 34, 0.5);
+}
+
+.crt-full-btn svg {
+    width: 10px;
+    height: 10px;
+}
+
 .mobile-tray-header {
     display: none;
     align-items: center;
@@ -1906,6 +1945,7 @@ body {
             inset 0 -2px 0 #9c8366,
             0 2px 0 #856e54,
             0 10px 25px rgba(0, 0, 0, 0.75);
+        transform: scale(1) !important;
     }
 
     .antenna-base {

@@ -94,6 +94,13 @@
             </svg>
             <span>FLOAT</span>
           </button>
+          <!-- Fullscreen Video Button -->
+          <button class="crt-full-btn" id="fullBtn" aria-label="Fullscreen Video" title="Fullscreen Video">
+            <svg viewBox="0 0 24 24" width="11" height="11" fill="currentColor">
+              <path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/>
+            </svg>
+            <span>FULL</span>
+          </button>
           <div id="yt-player-wrap" class="yt-player-wrap">
             <div id="yt-player"></div>
           </div>
@@ -207,6 +214,14 @@
                 <path d="M7 7h10v3l4-4-4-4v3H5v6h2V7zm10 10H7v-3l-4 4 4 4v-3h12v-6h-2v4z" />
               </svg>
               <span class="p-freq">LOOP</span>
+            </button>
+
+            <!-- AUTO PLAY BUTTON -->
+            <button class="preset-btn active" id="btnAutoPlay" aria-label="Auto Play" title="Toggle Auto Play Mode">
+              <svg class="deck-icon-svg" viewBox="0 0 24 24" width="12" height="12" fill="currentColor" aria-hidden="true">
+                <path d="M4 10h12v2H4zm0-4h12v2H4zm0 8h8v2H4zm10 0v6l5-3z" />
+              </svg>
+              <span class="p-freq">AUTO</span>
             </button>
           </div>
         </div>
@@ -376,7 +391,27 @@
           });
 
           this.localAudio.addEventListener('ended', () => {
-            if (this.mode === 'local' && this.callbacks.onEnd) this.callbacks.onEnd();
+            if (this.mode === 'local' && this.callbacks.onEnd) {
+              if (this._lastEnd && Date.now() - this._lastEnd < 1000) return;
+              this._lastEnd = Date.now();
+              this.callbacks.onEnd();
+            }
+          });
+
+          // Workaround for MP4 audio tracks sometimes not firing 'ended'
+          this.localAudio.addEventListener('timeupdate', () => {
+            if (this.mode === 'local' && this.localAudio.duration > 0) {
+              if (this.localAudio.duration - this.localAudio.currentTime < 0.3) {
+                if (!this._endedTriggered && this.callbacks.onEnd) {
+                  this._endedTriggered = true;
+                  if (this._lastEnd && Date.now() - this._lastEnd < 1000) return;
+                  this._lastEnd = Date.now();
+                  this.callbacks.onEnd();
+                }
+              } else {
+                this._endedTriggered = false;
+              }
+            }
           });
 
           this.localAudio.addEventListener('waiting', () => {
@@ -635,6 +670,7 @@
         this.volume = 80;
         this.isSeeking = false;
         this.isLoopMode = false;
+        this.isAutoPlay = true;
         this.listeners = [];
         this.progressInterval = null;
         this.pendingAutoplay = false;
@@ -666,8 +702,11 @@
           onEnd: () => {
             if (this.isLoopMode) {
               this.selectTrack(this.currentIndex, true);
-            } else {
+            } else if (this.isAutoPlay) {
               this.next(true);
+            } else {
+              this.pause();
+              this.seek(0);
             }
           },
           onBuffering: () => {
@@ -810,12 +849,13 @@
     const lcdListBtn = document.getElementById('lcdListBtn');
     const trackList = document.getElementById('trackList');
 
-    // Deck Buttons: PREV, PLAY, STOP, NEXT, LOOP
+    // Deck Buttons: PREV, PLAY, STOP, NEXT, LOOP, AUTO
     const btnPrev = document.getElementById('btnPrev');
     const btnPlay = document.getElementById('btnPlay');
     const btnStop = document.getElementById('btnStop');
     const btnNext = document.getElementById('btnNext');
     const btnLoop = document.getElementById('btnLoop');
+    const btnAutoPlay = document.getElementById('btnAutoPlay');
 
     let trayOpen = false;
     let vizRaf = null;
@@ -1029,6 +1069,15 @@
         setTimeout(() => btnLoop.classList.remove('pressed'), 120);
         playerController.isLoopMode = !playerController.isLoopMode;
         btnLoop.classList.toggle('active', playerController.isLoopMode);
+      });
+    }
+
+    if (btnAutoPlay) {
+      btnAutoPlay.addEventListener('click', () => {
+        btnAutoPlay.classList.add('pressed');
+        setTimeout(() => btnAutoPlay.classList.remove('pressed'), 120);
+        playerController.isAutoPlay = !playerController.isAutoPlay;
+        btnAutoPlay.classList.toggle('active', playerController.isAutoPlay);
       });
     }
 
@@ -1293,6 +1342,37 @@
           }
         } catch (err) {
           console.warn('Picture-in-Picture event:', err);
+        }
+      });
+    }
+
+    // ══ FULLSCREEN VIDEO ══
+    const fullBtn = document.getElementById('fullBtn');
+    if (fullBtn) {
+      fullBtn.addEventListener('click', async (e) => {
+        e.stopPropagation();
+        try {
+          const ytWrap = document.getElementById('yt-player-wrap');
+          const video = document.getElementById('radioVideo');
+          
+          // Determine which video is active
+          const elem = (ytWrap && ytWrap.style.display !== 'none') ? ytWrap : video;
+          
+          if (!document.fullscreenElement) {
+            if (elem.requestFullscreen) {
+              await elem.requestFullscreen();
+            } else if (elem.webkitRequestFullscreen) {
+              await elem.webkitRequestFullscreen();
+            } else if (elem.msRequestFullscreen) {
+              await elem.msRequestFullscreen();
+            }
+          } else {
+            if (document.exitFullscreen) {
+              await document.exitFullscreen();
+            }
+          }
+        } catch (err) {
+          console.warn('Fullscreen event:', err);
         }
       });
     }
