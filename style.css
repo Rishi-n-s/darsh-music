@@ -110,20 +110,25 @@ body {
     pointer-events: none;
     filter: none;
     opacity: 1;
-    transition: object-position 0.3s ease;
+    transition: opacity 0.3s ease;
 }
 
-/* Specific Portrait Mode Video Framing */
-@media (orientation: portrait) {
-    .bg-video {
-        width: 100vw;
-        height: 100vh;
-        height: 100dvh;
-        min-width: 100vw;
-        min-height: 100dvh;
-        object-fit: cover;
-        object-position: 50% 35%;
-        transform: translate(-50%, -50%);
+.bg-video-landscape {
+    display: block;
+}
+
+.bg-video-portrait {
+    display: none;
+}
+
+/* Specific Portrait Mode & Mobile Screens: Switch to dedicated portrait background video */
+@media (orientation: portrait), (max-width: 680px) {
+    .bg-video-landscape {
+        display: none;
+    }
+    .bg-video-portrait {
+        display: block;
+        object-position: center center;
     }
 }
 

@@ -32,9 +32,12 @@
     </h1>
   </header>
 
-  <!-- ══ Background Video Loop ══ -->
-  <video class="bg-video" autoplay muted loop playsinline preload="auto" aria-hidden="true">
+  <!-- ══ Background Video Loop (Responsive Landscape & Portrait) ══ -->
+  <video class="bg-video bg-video-landscape" autoplay muted loop playsinline preload="auto" aria-hidden="true">
     <source src="make_a_loop_video_of_this_imag.mp4" type="video/mp4">
+  </video>
+  <video class="bg-video bg-video-portrait" autoplay muted loop playsinline preload="auto" aria-hidden="true">
+    <source src="asstes/dont_move_focus_from_the_boy_i.mp4" type="video/mp4">
   </video>
 
   <!-- ══ FLOATING PLAYLIST TOGGLE (MOBILE / RESPONSIVE) ══ -->
@@ -1062,21 +1065,21 @@
     lcdMeta.textContent = `${initialTrack.title} · ${initialTrack.artist}`;
     lcdIdx.textContent = `01/39`;
 
-    // Ambient background video loop — smooth and relaxed 0.75x speed
-    const bgVideo = document.querySelector('.bg-video');
-    if (bgVideo) {
-      bgVideo.muted = true;
-      bgVideo.defaultPlaybackRate = 0.75;
-      bgVideo.playbackRate = 0.75;
+    // Ambient background video loops — smooth and relaxed 0.75x speed
+    const bgVideos = document.querySelectorAll('.bg-video');
+    bgVideos.forEach(v => {
+      v.muted = true;
+      v.defaultPlaybackRate = 0.75;
+      v.playbackRate = 0.75;
       const playBg = () => {
-        bgVideo.playbackRate = 0.75;
-        bgVideo.play().catch(() => {});
+        v.playbackRate = 0.75;
+        v.play().catch(() => {});
       };
       playBg();
-      bgVideo.addEventListener('loadedmetadata', playBg);
+      v.addEventListener('loadedmetadata', playBg);
       window.addEventListener('touchstart', playBg, { once: true });
       window.addEventListener('click', playBg, { once: true });
-    }
+    });
     const radioBodyEl = document.querySelector('.radio-body');
     if (radioBodyEl) {
       radioBodyEl.animate([

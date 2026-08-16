@@ -6,7 +6,7 @@
  * - Dynamic caching for all played music tracks
  */
 
-const CACHE_NAME = 'darsh-radio-v2';
+const CACHE_NAME = 'darsh-radio-v3';
 const STATIC_ASSETS = [
   './',
   './index.html',
@@ -15,6 +15,7 @@ const STATIC_ASSETS = [
   './app.js',
   './manifest.json',
   './make_a_loop_video_of_this_imag.mp4',
+  './asstes/dont_move_focus_from_the_boy_i.mp4',
   './asstes/105059-the-spider-man-into-spider-verse-png-download-free.png',
   './asstes/css/style.css'
 ];
