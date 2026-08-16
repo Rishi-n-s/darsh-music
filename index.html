@@ -13,6 +13,7 @@
     href="https://fonts.googleapis.com/css2?family=Rozha+One&family=Yatra+One&family=Gotu&family=Share+Tech+Mono&family=Outfit:wght@400;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap"
     rel="stylesheet">
   <link rel="stylesheet" href="style.css">
+  <script src="https://www.youtube.com/iframe_api"></script>
 </head>
 
 <body>
@@ -26,7 +27,7 @@
   </header>
 
   <!-- ══ Background Video Loop ══ -->
-  <video class="bg-video" autoplay muted loop playsinline aria-hidden="true">
+  <video class="bg-video" autoplay muted loop playsinline aria-hidden="true" onerror="this.style.display='none'">
     <source src="make_a_loop_video_of_this_imag.mp4" type="video/mp4">
   </video>
 
@@ -69,6 +70,9 @@
       <!-- ── LEFT MINI CRT VIDEO SCREEN ── -->
       <div class="speaker-panel" role="region" aria-label="Music Video Screen">
         <div class="radio-tv-screen" id="tvScreen">
+          <div id="yt-player-wrap" class="yt-player-wrap">
+            <div id="yt-player"></div>
+          </div>
           <video id="radioVideo" class="radio-screen-video" playsinline preload="auto"></video>
           <div class="tv-crt-overlay" aria-hidden="true"></div>
           <!-- Spider-Man inside Video Screen for Responsive -->
@@ -253,96 +257,150 @@
     // 1. PLAYLIST DATA (All 39 local tracks)
     // ════════════════════════════════════════════════════════════════════════════
     const PLAYLIST = [
-      { id: "song-01", title: "Kun Faya Kun", artist: "A.R. Rahman, Javed Ali, Mohit Chauhan", src: "asstes/music/ROCKSTAR Kun Faya Kun (Full Video Song)  Ranbir Kapoor  A.R. Rahman, Javed Ali, Mohit Chauhan_1080p.mp4" },
-      { id: "song-02", title: "Teri Deewani", artist: "Kailash Kher", src: "asstes/music/Teri Deewani - Kailash Kher  Official Video  Kailasa  Paresh  Naresh_480p.mp4" },
-      { id: "song-03", title: "Bulleya", artist: "Papon, Vishal & Shekhar", src: "asstes/music/Bulleya  Full Song  Sultan  Salman Khan, Anushka Sharma  Papon  Vishal & Shekhar  Irshad Kamil_1080p.mp4" },
-      { id: "song-04", title: "O Rangrez", artist: "Shreya Ghoshal, Javed Bashir", src: "asstes/music/O Rangrez Full Video - Bhaag Milkha BhaagFarhan, SonamShreya Ghoshal, Javed Bashir_1080p.mp4" },
-      { id: "song-05", title: "Jugni (Bulle Shah)", artist: "Tochi Raina", src: "asstes/music/Jugni Bulle Shah Tochi Raina - with Lyrics_1080p.mp4" },
-      { id: "song-06", title: "Aaj Se Teri", artist: "Arijit Singh, Amit Trivedi", src: "asstes/music/Aaj Se Teri  Padman  Akshay Kumar & Radhika Apte  Arijit Singh  Amit Trivedi_1080p.mp4" },
-      { id: "song-07", title: "Darkhaast", artist: "Arijit Singh, Sunidhi Chauhan", src: "asstes/music/DARKHAAST Full Video Song   SHIVAAY  Arijit Singh & Sunidhi Chauhan  Ajay Devgn  T-Series_1080p.mp4" },
-      { id: "song-08", title: "Kaise Hua", artist: "Vishal Mishra", src: "asstes/music/LYRICAL Kaise Hua  Kabir Singh  Shahid K, Kiara A, Sandeep V  Vishal Mishra, Manoj Muntashir_1080p.mp4" },
-      { id: "song-09", title: "Raabta (Kehte Hain Khuda)", artist: "Arijit Singh, Pritam", src: "asstes/music/Raabta (Kehte Hain Khuda) Full Song With Lyrics  Agent Vinod  Saif Ali Khan, Kareena Kapoor,Pritam_1080p.mp4" },
-      { id: "song-10", title: "Tu Chahiye", artist: "Atif Aslam, Pritam", src: "asstes/music/Tu Chahiye FULL VIDEO Song - Atif Aslam Pritam  Bajrangi Bhaijaan  Salman Khan, Kareena Kapoor_1080p.mp4" },
-      { id: "song-11", title: "O Saathi", artist: "Atif Aslam, Arko", src: "asstes/music/O Saathi Video Song  Baaghi 2  Tiger Shroff  Disha Patani  Arko  Ahmed Khan  Sajid Nadiadwala_1080p.mp4" },
-      { id: "song-12", title: "Yeh Fitoor Mera", artist: "Arijit Singh, Amit Trivedi", src: "asstes/music/Yeh Fitoor Mera - Full Video  Fitoor  Aditya Roy Kapur, Katrina Kaif  Arijit Singh  Amit Trivedi_1080p.mp4" },
-      { id: "song-13", title: "Deewaana Deewaana", artist: "A.R. Rahman, Dhanush", src: "asstes/music/Deewaana Deewaana (Full Video) Tere Ishk Mein  Dhanush, Kriti  AR Rahman  Aanand LR  Bhushan K_1080p.mp4" },
-      { id: "song-14", title: "Tenu Sang Rakhna", artist: "Arijit Singh, Achint, Anumita", src: "asstes/music/Tenu Sang Rakhna - Full Song Audio  Jigra  Alia Bhatt  Vedang Raina  Arijit Singh,Achint,Anumita_1080p.mp4" },
-      { id: "song-15", title: "Finding Her", artist: "Kushagra, Vanshika, Bharath", src: "asstes/music/Finding Her (Jana Mere Sawalon Ka Manzar Tu)  Kushagra  Vanshika  Bharath  Karan Maini UR Debut_1080p.mp4" },
-      { id: "song-16", title: "Finding Her (Female Version)", artist: "Tanishka Bahl, Kushagra", src: "asstes/music/Finding Her (Female Version)  Tanishka Bahl  Kushagra  Bharath  Saaheal  UR Debut  New Songs_1080p.mp4" },
-      { id: "song-17", title: "Ishqa Ve", artist: "Zeeshan Ali", src: "asstes/music/Ishqa Ve - Zeeshan Ali  Yuvraj Tung  Seerat Mast  Sandeep Aulakh  Latest Punjabi Songs 2025_1080p.mp4" },
-      { id: "song-18", title: "Jhaag", artist: "Chaar Diwaari", src: "asstes/music/Chaar Diwaari - Jhaag (Official Video)  Def Jam India_1080p.mp4" },
-      { id: "song-19", title: "MERA SAMAN KAHAN HAI", artist: "Chaar Diwaari", src: "asstes/music/Chaar Diwaari - MERA SAMAN KAHAN HAI (Official Video)  TERI MAIYAT KE GAANE EP_1080p.mp4" },
-      { id: "song-20", title: "Thehra", artist: "Chaar Diwaari", src: "asstes/music/Chaar Diwaari - Thehra (Official Video)  Pyaar Diwaari Arc 1  Def Jam India_1080p.mp4" },
-      { id: "song-21", title: "FAREBI", artist: "Chaar Diwaari x Raftaar", src: "asstes/music/Chaar Diwaari X @raftaarmusic  - FAREBI (Official Video)  Pyaar Diwaari Arc 3_1080p.mp4" },
-      { id: "song-22", title: "Aashiqana", artist: "Chaar Diwaari ft. Indian Ocean, Gini", src: "asstes/music/Chaar Diwaari ft. Indian Ocean, Gini - Aashiqana  Parvana EP  Def Jam India_1080p.mp4" },
-      { id: "song-23", title: "Iss Tarah", artist: "Chaar Diwaari ft. Sonu Nigam", src: "asstes/music/Chaar Diwaari ft. Sonu Nigam - Iss Tarah  Parvana EP  Def Jam India_1080p.mp4" },
-      { id: "song-24", title: "Banda Kaam Ka", artist: "Chaar Diwaari x Sanjith Hegde", src: "asstes/music/Chaar Diwaari x Sanjith Hegde - Banda Kaam Ka (Official Video)  Parvana EP  Def Jam India_1080p.mp4" },
-      { id: "song-25", title: "Safar", artist: "Bayaan, Sherazam", src: "asstes/music/Bayaan  Sherazam - Safar_1080p.mp4" },
-      { id: "song-26", title: "Bairan", artist: "Banjaare", src: "asstes/music/Bairan – Animated Love Story  Banjaare (Official Video)_1080p.mp4" },
-      { id: "song-27", title: "HASEEN", artist: "Talwiinder, NDS, Rippy", src: "asstes/music/HASEEN - TALWIINDER, NDS, RIPPY (Official Visualizer)_1080p.mp4" },
-      { id: "song-28", title: "Jhol (Acoustic)", artist: "Maanu, Annural Khalid, Abdullah Siddiqui", src: "asstes/music/Maanu - Jhol (Acoustic)  Annural Khalid  Abdullah Siddiqui  Asfand_1080p.mp4" },
-      { id: "song-29", title: "Khat (Lyrical)", artist: "Navjot Ahuja", src: "asstes/music/Navjot Ahuja - Khat (Lyrical Video)_1080p.mp4" },
-      { id: "song-30", title: "Khat (Official Audio)", artist: "Navjot Ahuja", src: "asstes/music/Navjot Ahuja - Khat (Official Audio)_1080p.mp4" },
-      { id: "song-31", title: "Dooron Dooron (Unplugged)", artist: "Paresh Pahuja, Shiv Tandan", src: "asstes/music/Dooron Dooron (Official Video) - Unplugged  Paresh Pahuja  Shiv Tandan  T-Series_1080p.mp4" },
-      { id: "song-32", title: "Dil To Bachcha Hai Ji", artist: "Rahat Fateh Ali Khan", src: "asstes/music/Dil To Bachcha Hai Ji HD 5.1 Sound ll Ishqiya 2010 ll Rahat Fateh Ali Khan ll 4k & 1080p HD ll_1080p.mp4" },
-      { id: "song-33", title: "Zindagi Kuch Toh Bata (Reprise)", artist: "Rahat Fateh Ali Khan, Pritam", src: "asstes/music/Zindagi Kuch Toh Bata (Reprise) Full Song with LYRICS Pritam  Salman Khan  Bajrangi Bhaijaan_1080p.mp4" },
-      { id: "song-34", title: "TERI TERI YAAD", artist: "Gyanii Sangeet", src: "asstes/music/TERI TERI YAAD  GYANII SANGEET  FULL VIDEO_1080p.mp4" },
-      { id: "song-35", title: "Othaiyadi Pathayila", artist: "Dhibu Ninan Thomas, Anirudh", src: "asstes/music/Kanaa - Othaiyadi Pathayila Video  Arunraja Kamaraj  Dhibu Ninan Thomas_1080p.mp4" },
-      { id: "song-36", title: "Koodappirannor", artist: "Sooraj Santhosh, Ankit Menon", src: "asstes/music/Koodappirannor - Video  Vaazha 2  Parvatish PradeepSooraj SanthoshAnkit MenonVipin DasSavin SA_1080p.mp4" },
-      { id: "song-37", title: "12 Years", artist: "Lucky Rathore ft. PnkjOfficial", src: "asstes/music/12 Years - Lucky Rathore ft. @PnkjOfficial   Prod. Maxx Turnn  2025_1080p.mp4" },
-      { id: "song-38", title: "UDI UDI", artist: "Aneesh Poojari & Sarkar Music", src: "asstes/music/UDI UDI   @Aneesh.Poojari &_ @sarkarmusic.25  The Collective Tape  Official Music Video_1080p.mp4" },
-      { id: "song-39", title: "Darsh Midnight Frequency", artist: "Darsh Radio Special", src: "asstes/music/_1080p.mp4" }
+      { id: "song-01", title: "Kun Faya Kun", artist: "A.R. Rahman, Javed Ali, Mohit Chauhan", videoId: "T94PHkCQBCQ", src: "asstes/music/ROCKSTAR Kun Faya Kun (Full Video Song)  Ranbir Kapoor  A.R. Rahman, Javed Ali, Mohit Chauhan_1080p.mp4" },
+      { id: "song-02", title: "Teri Deewani", artist: "Kailash Kher", videoId: "FH8bTKMcRNQ", src: "asstes/music/Teri Deewani - Kailash Kher  Official Video  Kailasa  Paresh  Naresh_480p.mp4" },
+      { id: "song-03", title: "Bulleya", artist: "Papon, Vishal & Shekhar", videoId: "MzFGDIJuRnQ", src: "asstes/music/Bulleya  Full Song  Sultan  Salman Khan, Anushka Sharma  Papon  Vishal & Shekhar  Irshad Kamil_1080p.mp4" },
+      { id: "song-04", title: "O Rangrez", artist: "Shreya Ghoshal, Javed Bashir", videoId: "W5GBH6YsGWg", src: "asstes/music/O Rangrez Full Video - Bhaag Milkha BhaagFarhan, SonamShreya Ghoshal, Javed Bashir_1080p.mp4" },
+      { id: "song-05", title: "Jugni (Bulle Shah)", artist: "Tochi Raina", videoId: "qzLtJu-ZI_0", src: "asstes/music/Jugni Bulle Shah Tochi Raina - with Lyrics_1080p.mp4" },
+      { id: "song-06", title: "Aaj Se Teri", artist: "Arijit Singh, Amit Trivedi", videoId: "L2G349_h49I", src: "asstes/music/Aaj Se Teri  Padman  Akshay Kumar & Radhika Apte  Arijit Singh  Amit Trivedi_1080p.mp4" },
+      { id: "song-07", title: "Darkhaast", artist: "Arijit Singh, Sunidhi Chauhan", videoId: "A8-5L1qP-8U", src: "asstes/music/DARKHAAST Full Video Song   SHIVAAY  Arijit Singh & Sunidhi Chauhan  Ajay Devgn  T-Series_1080p.mp4" },
+      { id: "song-08", title: "Kaise Hua", artist: "Vishal Mishra", videoId: "Fp8msa5uYsc", src: "asstes/music/LYRICAL Kaise Hua  Kabir Singh  Shahid K, Kiara A, Sandeep V  Vishal Mishra, Manoj Muntashir_1080p.mp4" },
+      { id: "song-09", title: "Raabta (Kehte Hain Khuda)", artist: "Arijit Singh, Pritam", videoId: "sS6-P1d5H-g", src: "asstes/music/Raabta (Kehte Hain Khuda) Full Song With Lyrics  Agent Vinod  Saif Ali Khan, Kareena Kapoor,Pritam_1080p.mp4" },
+      { id: "song-10", title: "Tu Chahiye", artist: "Atif Aslam, Pritam", videoId: "zuvla6ABKbs", src: "asstes/music/Tu Chahiye FULL VIDEO Song - Atif Aslam Pritam  Bajrangi Bhaijaan  Salman Khan, Kareena Kapoor_1080p.mp4" },
+      { id: "song-11", title: "O Saathi", artist: "Atif Aslam, Arko", videoId: "7R6FoUE7yM8", src: "asstes/music/O Saathi Video Song  Baaghi 2  Tiger Shroff  Disha Patani  Arko  Ahmed Khan  Sajid Nadiadwala_1080p.mp4" },
+      { id: "song-12", title: "Yeh Fitoor Mera", artist: "Arijit Singh, Amit Trivedi", videoId: "B65H9G10g3k", src: "asstes/music/Yeh Fitoor Mera - Full Video  Fitoor  Aditya Roy Kapur, Katrina Kaif  Arijit Singh  Amit Trivedi_1080p.mp4" },
+      { id: "song-13", title: "Deewaana Deewaana", artist: "A.R. Rahman, Dhanush", videoId: "r7bUPL3P99Q", src: "asstes/music/Deewaana Deewaana (Full Video) Tere Ishk Mein  Dhanush, Kriti  AR Rahman  Aanand LR  Bhushan K_1080p.mp4" },
+      { id: "song-14", title: "Tenu Sang Rakhna", artist: "Arijit Singh, Achint, Anumita", videoId: "0k57_u0b3aQ", src: "asstes/music/Tenu Sang Rakhna - Full Song Audio  Jigra  Alia Bhatt  Vedang Raina  Arijit Singh,Achint,Anumita_1080p.mp4" },
+      { id: "song-15", title: "Finding Her", artist: "Kushagra, Vanshika, Bharath", videoId: "kXpQ7R1z6m4", src: "asstes/music/Finding Her (Jana Mere Sawalon Ka Manzar Tu)  Kushagra  Vanshika  Bharath  Karan Maini UR Debut_1080p.mp4" },
+      { id: "song-16", title: "Finding Her (Female Version)", artist: "Tanishka Bahl, Kushagra", videoId: "P8cT2Hy96SU", src: "asstes/music/Finding Her (Female Version)  Tanishka Bahl  Kushagra  Bharath  Saaheal  UR Debut  New Songs_1080p.mp4" },
+      { id: "song-17", title: "Ishqa Ve", artist: "Zeeshan Ali", videoId: "ZLlkl0Oqbv8", src: "asstes/music/Ishqa Ve - Zeeshan Ali  Yuvraj Tung  Seerat Mast  Sandeep Aulakh  Latest Punjabi Songs 2025_1080p.mp4" },
+      { id: "song-18", title: "Jhaag", artist: "Chaar Diwaari", videoId: "0c4Fq7e5p8E", src: "asstes/music/Chaar Diwaari - Jhaag (Official Video)  Def Jam India_1080p.mp4" },
+      { id: "song-19", title: "MERA SAMAN KAHAN HAI", artist: "Chaar Diwaari", videoId: "7R_7z7p88aM", src: "asstes/music/Chaar Diwaari - MERA SAMAN KAHAN HAI (Official Video)  TERI MAIYAT KE GAANE EP_1080p.mp4" },
+      { id: "song-20", title: "Thehra", artist: "Chaar Diwaari", videoId: "n0fK2b7nZ6w", src: "asstes/music/Chaar Diwaari - Thehra (Official Video)  Pyaar Diwaari Arc 1  Def Jam India_1080p.mp4" },
+      { id: "song-21", title: "FAREBI", artist: "Chaar Diwaari x Raftaar", videoId: "pU7yB_aX3wQ", src: "asstes/music/Chaar Diwaari X @raftaarmusic  - FAREBI (Official Video)  Pyaar Diwaari Arc 3_1080p.mp4" },
+      { id: "song-22", title: "Aashiqana", artist: "Chaar Diwaari ft. Indian Ocean, Gini", videoId: "tG4kX6yR8qM", src: "asstes/music/Chaar Diwaari ft. Indian Ocean, Gini - Aashiqana  Parvana EP  Def Jam India_1080p.mp4" },
+      { id: "song-23", title: "Iss Tarah", artist: "Chaar Diwaari ft. Sonu Nigam", videoId: "Tl9JGFRrfIM", src: "asstes/music/Chaar Diwaari ft. Sonu Nigam - Iss Tarah  Parvana EP  Def Jam India_1080p.mp4" },
+      { id: "song-24", title: "Banda Kaam Ka", artist: "Chaar Diwaari x Sanjith Hegde", videoId: "hJ5vN2mX7wP", src: "asstes/music/Chaar Diwaari x Sanjith Hegde - Banda Kaam Ka (Official Video)  Parvana EP  Def Jam India_1080p.mp4" },
+      { id: "song-25", title: "Safar", artist: "Bayaan, Sherazam", videoId: "UJkNQgBCUvQ", src: "asstes/music/Bayaan  Sherazam - Safar_1080p.mp4" },
+      { id: "song-26", title: "Bairan", artist: "Banjaare", videoId: "NZQNfMT7lWs", src: "asstes/music/Bairan – Animated Love Story  Banjaare (Official Video)_1080p.mp4" },
+      { id: "song-27", title: "HASEEN", artist: "Talwiinder, NDS, Rippy", videoId: "vB6zN2kX7pQ", src: "asstes/music/HASEEN - TALWIINDER, NDS, RIPPY (Official Visualizer)_1080p.mp4" },
+      { id: "song-28", title: "Jhol (Acoustic)", artist: "Maanu, Annural Khalid, Abdullah Siddiqui", videoId: "7-GJHPPedpE", src: "asstes/music/Maanu - Jhol (Acoustic)  Annural Khalid  Abdullah Siddiqui  Asfand_1080p.mp4" },
+      { id: "song-29", title: "Khat (Lyrical)", artist: "Navjot Ahuja", videoId: "BqMNhBWJCbo", src: "asstes/music/Navjot Ahuja - Khat (Lyrical Video)_1080p.mp4" },
+      { id: "song-30", title: "Khat (Official Audio)", artist: "Navjot Ahuja", videoId: "BqMNhBWJCbo", src: "asstes/music/Navjot Ahuja - Khat (Official Audio)_1080p.mp4" },
+      { id: "song-31", title: "Dooron Dooron (Unplugged)", artist: "Paresh Pahuja, Shiv Tandan", videoId: "qL6yN2vX8qM", src: "asstes/music/Dooron Dooron (Official Video) - Unplugged  Paresh Pahuja  Shiv Tandan  T-Series_1080p.mp4" },
+      { id: "song-32", title: "Dil To Bachcha Hai Ji", artist: "Rahat Fateh Ali Khan", videoId: "yqFDWtFbxPg", src: "asstes/music/Dil To Bachcha Hai Ji HD 5.1 Sound ll Ishqiya 2010 ll Rahat Fateh Ali Khan ll 4k & 1080p HD ll_1080p.mp4" },
+      { id: "song-33", title: "Zindagi Kuch Toh Bata (Reprise)", artist: "Rahat Fateh Ali Khan, Pritam", videoId: "3hq9SxcJjuQ", src: "asstes/music/Zindagi Kuch Toh Bata (Reprise) Full Song with LYRICS Pritam  Salman Khan  Bajrangi Bhaijaan_1080p.mp4" },
+      { id: "song-34", title: "TERI TERI YAAD", artist: "Gyanii Sangeet", videoId: "5Fh1VK9Xj5A", src: "asstes/music/TERI TERI YAAD  GYANII SANGEET  FULL VIDEO_1080p.mp4" },
+      { id: "song-35", title: "Othaiyadi Pathayila", artist: "Dhibu Ninan Thomas, Anirudh", videoId: "lPqmB7MbCVA", src: "asstes/music/Kanaa - Othaiyadi Pathayila Video  Arunraja Kamaraj  Dhibu Ninan Thomas_1080p.mp4" },
+      { id: "song-36", title: "Koodappirannor", artist: "Sooraj Santhosh, Ankit Menon", videoId: "9O7xL6RxnTA", src: "asstes/music/Koodappirannor - Video  Vaazha 2  Parvatish PradeepSooraj SanthoshAnkit MenonVipin DasSavin SA_1080p.mp4" },
+      { id: "song-37", title: "12 Years", artist: "Lucky Rathore ft. PnkjOfficial", videoId: "X9n7mB2vLqM", src: "asstes/music/12 Years - Lucky Rathore ft. @PnkjOfficial   Prod. Maxx Turnn  2025_1080p.mp4" },
+      { id: "song-38", title: "UDI UDI", artist: "Aneesh Poojari & Sarkar Music", videoId: "JpvZB7ZFUQE", src: "asstes/music/UDI UDI   @Aneesh.Poojari &_ @sarkarmusic.25  The Collective Tape  Official Music Video_1080p.mp4" },
+      { id: "song-39", title: "Darsh Midnight Frequency", artist: "Darsh Radio Special", videoId: "sS6-P1d5H-g", src: "asstes/music/_1080p.mp4" }
     ];
 
     // ════════════════════════════════════════════════════════════════════════════
-    // 2. LOCAL MEDIA PROVIDER (Seamless local HTML5 playback)
+    // 2. HYBRID UNIVERSAL MEDIA PROVIDER (Seamless Local + YouTube Fallback)
     // ════════════════════════════════════════════════════════════════════════════
-    class LocalMediaProvider {
+    class HybridMediaProvider {
       constructor() {
-        this.media = null;
+        this.mode = 'local'; // 'local' | 'youtube'
+        this.localMedia = null;
+        this.ytPlayer = null;
         this.isReady = false;
         this.callbacks = {};
         this.currentTrack = null;
+        this.loadToken = 0;
+        this.volume = 80;
+        this.ytReady = false;
       }
 
       init(callbacks) {
         this.callbacks = callbacks;
-        this.media = document.getElementById('radioVideo');
-        if (!this.media) {
-          this.media = document.createElement('video');
-          this.media.id = 'radioVideo';
-          this.media.playsInline = true;
-          this.media.preload = 'auto';
-          document.body.appendChild(this.media);
+        this.localMedia = document.getElementById('radioVideo');
+
+        // Setup Local Media events
+        if (this.localMedia) {
+          this.localMedia.addEventListener('canplay', () => {
+            if (this.mode === 'local') {
+              this.isReady = true;
+              if (this.callbacks.onReady) this.callbacks.onReady();
+            }
+          });
+
+          this.localMedia.addEventListener('play', () => {
+            if (this.mode === 'local' && this.callbacks.onPlay) this.callbacks.onPlay();
+          });
+
+          this.localMedia.addEventListener('pause', () => {
+            if (this.mode === 'local' && this.callbacks.onPause) this.callbacks.onPause();
+          });
+
+          this.localMedia.addEventListener('ended', () => {
+            if (this.mode === 'local' && this.callbacks.onEnd) this.callbacks.onEnd();
+          });
+
+          this.localMedia.addEventListener('waiting', () => {
+            if (this.mode === 'local' && this.callbacks.onBuffering) this.callbacks.onBuffering();
+          });
+
+          this.localMedia.addEventListener('error', (e) => {
+            console.warn('Local media file error/pointer detected, falling back to YouTube streaming:', e);
+            this._fallbackToYouTube(true);
+          });
         }
 
-        this.media.addEventListener('canplay', () => {
-          if (!this.isReady) {
-            this.isReady = true;
-            if (this.callbacks.onReady) this.callbacks.onReady();
+        // Setup YouTube API
+        const createYT = () => {
+          if (this.ytPlayer) return;
+          try {
+            this.ytPlayer = new YT.Player('yt-player', {
+              height: '100%',
+              width: '100%',
+              videoId: PLAYLIST[0].videoId,
+              playerVars: {
+                autoplay: 0,
+                controls: 0,
+                rel: 0,
+                modestbranding: 1,
+                iv_load_policy: 3,
+                disablekb: 1,
+                playsinline: 1,
+                enablejsapi: 1,
+                origin: window.location.origin
+              },
+              events: {
+                onReady: () => {
+                  this.ytReady = true;
+                  if (this.ytPlayer && typeof this.ytPlayer.setVolume === 'function') {
+                    this.ytPlayer.setVolume(this.volume);
+                  }
+                  if (this.mode === 'youtube' && this.callbacks.onReady) {
+                    this.callbacks.onReady();
+                  }
+                },
+                onStateChange: (e) => {
+                  if (this.mode !== 'youtube') return;
+                  const S = YT.PlayerState;
+                  if (e.data === S.PLAYING && this.callbacks.onPlay) this.callbacks.onPlay();
+                  if (e.data === S.PAUSED && this.callbacks.onPause) this.callbacks.onPause();
+                  if (e.data === S.ENDED && this.callbacks.onEnd) this.callbacks.onEnd();
+                  if (e.data === S.BUFFERING && this.callbacks.onBuffering) this.callbacks.onBuffering();
+                },
+                onError: (err) => {
+                  console.warn('YouTube streaming event:', err);
+                }
+              }
+            });
+          } catch (err) {
+            console.warn('YouTube initialization error:', err);
           }
-        });
+        };
 
-        this.media.addEventListener('play', () => {
-          if (this.callbacks.onPlay) this.callbacks.onPlay();
-        });
-
-        this.media.addEventListener('pause', () => {
-          if (this.callbacks.onPause) this.callbacks.onPause();
-        });
-
-        this.media.addEventListener('ended', () => {
-          if (this.callbacks.onEnd) this.callbacks.onEnd();
-        });
-
-        this.media.addEventListener('waiting', () => {
-          if (this.callbacks.onBuffering) this.callbacks.onBuffering();
-        });
-
-        this.media.addEventListener('error', (e) => {
-          console.warn('Playback error, auto-recovering:', e);
-          if (this.callbacks.onError) this.callbacks.onError(e);
-        });
+        if (window.YT && window.YT.Player) {
+          createYT();
+        } else {
+          window.onYouTubeIframeAPIReady = createYT;
+        }
 
         this.isReady = true;
         if (this.callbacks.onReady) this.callbacks.onReady();
@@ -350,45 +408,125 @@
 
       loadTrack(track, autoPlay = true) {
         this.currentTrack = track;
-        this.media.src = track.src;
-        this.media.load();
-        if (autoPlay) {
-          this.media.play().catch(e => {
-            console.log('Autoplay waiting for user interaction:', e);
-          });
+        const token = ++this.loadToken;
+
+        if (this.mode === 'youtube') {
+          this._loadYouTubeTrack(track, autoPlay);
+          return;
+        }
+
+        if (this.localMedia && track.src) {
+          this.localMedia.src = track.src;
+          this.localMedia.load();
+          if (autoPlay) {
+            const playPromise = this.localMedia.play();
+            if (playPromise && typeof playPromise.catch === 'function') {
+              playPromise.catch(e => {
+                console.warn('Local play error, switching to YouTube stream:', e);
+                if (token === this.loadToken) {
+                  this._fallbackToYouTube(autoPlay);
+                }
+              });
+            }
+          }
+        } else {
+          this._fallbackToYouTube(autoPlay);
+        }
+      }
+
+      _fallbackToYouTube(autoPlay = true) {
+        this.mode = 'youtube';
+        const wrap = document.getElementById('yt-player-wrap');
+        if (wrap) wrap.style.display = 'block';
+        if (this.localMedia) {
+          this.localMedia.pause();
+          this.localMedia.style.display = 'none';
+        }
+        if (this.currentTrack) {
+          this._loadYouTubeTrack(this.currentTrack, autoPlay);
+        }
+      }
+
+      _loadYouTubeTrack(track, autoPlay) {
+        const wrap = document.getElementById('yt-player-wrap');
+        if (wrap) wrap.style.display = 'block';
+        if (this.localMedia) this.localMedia.style.display = 'none';
+
+        if (this.ytPlayer && typeof this.ytPlayer.loadVideoById === 'function') {
+          if (autoPlay) {
+            this.ytPlayer.loadVideoById(track.videoId);
+          } else {
+            this.ytPlayer.cueVideoById(track.videoId);
+          }
+          this.ytPlayer.setVolume(this.volume);
+        } else {
+          // If YT is still loading, wait a moment and retry
+          setTimeout(() => {
+            if (this.ytPlayer && typeof this.ytPlayer.loadVideoById === 'function') {
+              if (autoPlay) this.ytPlayer.loadVideoById(track.videoId);
+              else this.ytPlayer.cueVideoById(track.videoId);
+              this.ytPlayer.setVolume(this.volume);
+            }
+          }, 300);
         }
       }
 
       play() {
-        if (this.media) {
-          this.media.play().catch(e => console.log('Play request received:', e));
+        if (this.mode === 'youtube') {
+          if (this.ytPlayer && typeof this.ytPlayer.playVideo === 'function') {
+            this.ytPlayer.playVideo();
+          }
+        } else {
+          if (this.localMedia) {
+            this.localMedia.play().catch(() => this._fallbackToYouTube(true));
+          }
         }
       }
 
       pause() {
-        if (this.media) {
-          this.media.pause();
+        if (this.mode === 'youtube') {
+          if (this.ytPlayer && typeof this.ytPlayer.pauseVideo === 'function') {
+            this.ytPlayer.pauseVideo();
+          }
+        } else {
+          if (this.localMedia) this.localMedia.pause();
         }
       }
 
       seek(seconds) {
-        if (this.media && Number.isFinite(seconds)) {
-          this.media.currentTime = seconds;
+        if (this.mode === 'youtube') {
+          if (this.ytPlayer && typeof this.ytPlayer.seekTo === 'function') {
+            this.ytPlayer.seekTo(seconds, true);
+          }
+        } else {
+          if (this.localMedia && Number.isFinite(seconds)) {
+            this.localMedia.currentTime = seconds;
+          }
         }
       }
 
       setVolume(volume) {
-        if (this.media) {
-          this.media.volume = Math.max(0, Math.min(1, volume / 100));
+        this.volume = Math.max(0, Math.min(100, volume));
+        if (this.ytPlayer && typeof this.ytPlayer.setVolume === 'function') {
+          this.ytPlayer.setVolume(this.volume);
+        }
+        if (this.localMedia) {
+          this.localMedia.volume = Math.max(0, Math.min(1, this.volume / 100));
         }
       }
 
       getCurrentTime() {
-        return this.media ? (this.media.currentTime || 0) : 0;
+        if (this.mode === 'youtube') {
+          return (this.ytPlayer && typeof this.ytPlayer.getCurrentTime === 'function') ? (this.ytPlayer.getCurrentTime() || 0) : 0;
+        }
+        return this.localMedia ? (this.localMedia.currentTime || 0) : 0;
       }
 
       getDuration() {
-        return this.media ? (this.media.duration || 0) : 0;
+        if (this.mode === 'youtube') {
+          return (this.ytPlayer && typeof this.ytPlayer.getDuration === 'function') ? (this.ytPlayer.getDuration() || 0) : 0;
+        }
+        return this.localMedia ? (this.localMedia.duration || 0) : 0;
       }
     }
 
@@ -447,7 +585,6 @@
           },
           onError: (errCode) => {
             this._notify('error', errCode);
-            setTimeout(() => this.next(true), 1500);
           }
         });
       }
@@ -560,8 +697,8 @@
     // ════════════════════════════════════════════════════════════════════════════
     // 5. DARSH FM UI CONTROLLER & BINDINGS
     // ════════════════════════════════════════════════════════════════════════════
-    const localProvider = new LocalMediaProvider();
-    const playerController = new PlayerController(PLAYLIST, localProvider);
+    const mediaProvider = new HybridMediaProvider();
+    const playerController = new PlayerController(PLAYLIST, mediaProvider);
 
     // DOM elements
     const playBtn = document.getElementById('playBtn');
