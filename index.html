@@ -384,8 +384,10 @@
           });
 
           this.localAudio.addEventListener('error', (e) => {
-            console.warn('Local audio error, falling back to YouTube streaming:', e);
-            this._fallbackToYouTube(true);
+            console.warn('Local audio error notice:', e);
+            if (navigator.onLine && window.YT) {
+              this._fallbackToYouTube(true);
+            }
           });
         }
 
@@ -469,42 +471,50 @@
         this.currentTrack = track;
         const token = ++this.loadToken;
 
-        if (this.mode === 'youtube') {
-          this._loadYouTubeTrack(track, autoPlay);
-          return;
-        }
+        // Prioritize local audio/video for 100% offline playback
+        if (track && track.src) {
+          this.mode = 'local';
+          const wrap = document.getElementById('yt-player-wrap');
+          if (wrap) wrap.style.display = 'none';
+          if (this.localMedia) this.localMedia.style.display = 'block';
 
-        if (this.localAudio && track.src) {
-          this.localAudio.src = track.src;
-          this.localAudio.volume = Math.max(0, Math.min(1, this.volume / 100));
-          this.localAudio.load();
-
-          if (this.localMedia) {
-            this.localMedia.src = track.src;
-            this.localMedia.muted = true;
-            this.localMedia.load();
+          if (this.ytPlayer && typeof this.ytPlayer.pauseVideo === 'function') {
+            try { this.ytPlayer.pauseVideo(); } catch (e) {}
           }
 
-          if (autoPlay) {
-            const playPromise = this.localAudio.play();
-            if (this.localMedia && !document.hidden) {
-              this.localMedia.play().catch(() => {});
+          if (this.localAudio) {
+            this.localAudio.src = track.src;
+            this.localAudio.volume = Math.max(0, Math.min(1, this.volume / 100));
+            this.localAudio.load();
+
+            if (this.localMedia) {
+              this.localMedia.src = track.src;
+              this.localMedia.muted = true;
+              this.localMedia.load();
             }
-            if (playPromise && typeof playPromise.catch === 'function') {
-              playPromise.catch(e => {
-                console.warn('Local audio play error, switching to stream:', e);
-                if (token === this.loadToken) {
-                  this._fallbackToYouTube(autoPlay);
-                }
-              });
+
+            if (autoPlay) {
+              const playPromise = this.localAudio.play();
+              if (this.localMedia && !document.hidden) {
+                this.localMedia.play().catch(() => {});
+              }
+              if (playPromise && typeof playPromise.catch === 'function') {
+                playPromise.catch(e => {
+                  console.warn('Local audio play notice:', e);
+                  if (token === this.loadToken && navigator.onLine && window.YT) {
+                    this._fallbackToYouTube(autoPlay);
+                  }
+                });
+              }
             }
           }
-        } else {
+        } else if (navigator.onLine && window.YT) {
           this._fallbackToYouTube(autoPlay);
         }
       }
 
       _fallbackToYouTube(autoPlay = true) {
+        if (!navigator.onLine || !window.YT) return;
         this.mode = 'youtube';
         const wrap = document.getElementById('yt-player-wrap');
         if (wrap) wrap.style.display = 'block';
@@ -548,7 +558,10 @@
           }
         } else {
           if (this.localAudio) {
-            this.localAudio.play().catch(() => this._fallbackToYouTube(true));
+            this.localAudio.play().catch(err => {
+              console.warn('Local play notice:', err);
+              if (navigator.onLine && window.YT) this._fallbackToYouTube(true);
+            });
           }
           if (this.localMedia && !document.hidden) {
             this.localMedia.play().catch(() => {});
@@ -1203,10 +1216,36 @@
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
         navigator.serviceWorker.register('./sw.js')
-          .then(reg => console.log('Darsh Radio Offline Service Worker active:', reg.scope))
+          .then(reg => {
+            console.log('Darsh Radio Offline Service Worker active:', reg.scope);
+            if (reg.waiting) {
+              reg.waiting.postMessage({ type: 'SKIP_WAITING' });
+            }
+          })
           .catch(err => console.warn('Service Worker registration:', err));
       });
     }
+
+    // Network status listeners
+    window.addEventListener('offline', () => {
+      const curTrack = playerController.getCurrentTrack();
+      if (lcdMeta) {
+        lcdMeta.textContent = `⚡ OFFLINE MODE · LOCAL MEDIA ACTIVE`;
+        setTimeout(() => {
+          if (curTrack) lcdMeta.textContent = `${curTrack.title} · ${curTrack.artist}`;
+        }, 3500);
+      }
+    });
+
+    window.addEventListener('online', () => {
+      const curTrack = playerController.getCurrentTrack();
+      if (lcdMeta) {
+        lcdMeta.textContent = `⚡ ONLINE · DARSH FM SYNCED`;
+        setTimeout(() => {
+          if (curTrack) lcdMeta.textContent = `${curTrack.title} · ${curTrack.artist}`;
+        }, 3000);
+      }
+    });
 
     // ══ PWA "ADD TO HOME SCREEN / INSTALL APP" PROMPT ══
     let deferredInstallPrompt = null;
