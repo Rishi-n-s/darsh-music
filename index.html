@@ -4,365 +4,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DARSH FM — Retro FM Music Player</title>
-    <meta name="description" content="DARSH FM — A retro skeuomorphic FM radio player featuring curated indie tracks.">
+    <title>DARSH D PLAYLIST — Retro FM Radio</title>
+    <meta name="description" content="DARSH D PLAYLIST — A retro skeuomorphic FM radio player featuring curated music tracks.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Outfit:wght@400;600;700&display=swap"
+    <link href="https://fonts.googleapis.com/css2?family=Rozha+One&family=Yatra+One&family=Gotu&family=Share+Tech+Mono&family=Outfit:wght@400;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap"
         rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 
     <style>
         /* ── Hidden audio player engine ── */
-        #yt-player-wrap {
-            position: fixed;
-            bottom: 0;
-            right: 0;
-            width: 200px;
-            height: 120px;
-            opacity: 0.001; /* Active on-screen layer so browser media engine never throttles */
-            pointer-events: none;
-            z-index: -10;
+        #radioAudioEngine {
+            display: none;
         }
 
-        /* ── Playlist tray ── slides in and out of the radio top slot ── */
-        .playlist-tray {
-            position: fixed;
-            bottom: 180px;
-            left: 50%;
-            transform: translateX(-50%) translateY(calc(100% - 32px));
-            width: min(480px, 94vw);
-            max-width: calc(100vw - 20px);
-            z-index: 10;
-            transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1);
-            display: flex;
-            flex-direction: column;
-        }
-
-        .playlist-tray.open {
-            transform: translateX(-50%) translateY(0);
-        }
-
-        /* Radio sits in front so tray slides directly inside it */
-        .scene {
-            position: relative;
-            z-index: 20;
-        }
-
-        /* Tray handle — stays docked on the radio top slot when closed */
-        .tray-handle {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 8px 16px;
-            min-height: 34px;
-            background: linear-gradient(180deg, #3d2a10 0%, #2a1d09 100%);
-            border: 1px solid rgba(255, 160, 40, 0.25);
-            border-bottom: none;
-            border-radius: 8px 8px 0 0;
-            cursor: pointer;
-            font-family: 'Share Tech Mono', monospace;
-            font-size: 10px;
-            letter-spacing: 0.2em;
-            color: rgba(200, 140, 50, 0.85);
-            user-select: none;
-            box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.3);
-            transition: color 0.2s, background 0.2s;
-            touch-action: manipulation;
-        }
-
-        .tray-handle:hover,
-        .tray-handle:focus-visible {
-            color: rgba(255, 190, 60, 1);
-            background: linear-gradient(180deg, #483214 0%, #32230b 100%);
-            outline: none;
-        }
-
-        .tray-arrow {
-            display: inline-block;
-            transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-
-        .playlist-tray.open .tray-arrow {
-            transform: rotate(180deg);
-        }
-
-        /* Scrollable song list — sits below handle, slides down into radio body */
-        .tray-body {
-            max-height: 260px;
-            overflow-y: auto;
-            background: linear-gradient(180deg, #201408 0%, #180f05 100%);
-            border: 1px solid rgba(255, 160, 40, 0.18);
-            border-top: none;
-            border-radius: 0;
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
-            -webkit-overflow-scrolling: touch;
-        }
-
-        .tray-body::-webkit-scrollbar {
-            width: 4px;
-        }
-
-        .tray-body::-webkit-scrollbar-track {
-            background: transparent;
-        }
-
-        .tray-body::-webkit-scrollbar-thumb {
-            background: rgba(255, 160, 40, 0.25);
-            border-radius: 2px;
-        }
-
-        .track-item {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 9px 14px;
-            min-height: 44px; /* Comfortable touch target */
-            cursor: pointer;
-            border-bottom: 1px solid rgba(255, 160, 40, 0.06);
-            transition: background 0.15s;
-            user-select: none;
-            touch-action: manipulation;
-        }
-
-        .track-item:hover,
-        .track-item:focus-visible {
-            background: rgba(255, 160, 40, 0.08);
-            outline: none;
-        }
-
-        .track-item.active {
-            background: rgba(255, 160, 40, 0.12);
-            border-left: 3px solid rgba(255, 160, 40, 0.65);
-        }
-
-        .track-num {
-            font-family: 'Share Tech Mono', monospace;
-            font-size: 9px;
-            color: rgba(200, 130, 40, 0.45);
-            width: 22px;
-            flex-shrink: 0;
-        }
-
-        .track-info {
-            flex: 1;
-            min-width: 0;
-        }
-
-        .track-title {
-            font-family: 'Share Tech Mono', monospace;
-            font-size: 11px;
-            color: rgba(255, 180, 60, 0.85);
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .track-artist {
-            font-family: 'Share Tech Mono', monospace;
-            font-size: 9px;
-            color: rgba(180, 120, 40, 0.55);
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            margin-top: 1px;
-        }
-
-        .track-play-icon {
-            font-size: 10px;
-            color: rgba(255, 160, 40, 0.5);
-            flex-shrink: 0;
-            width: 14px;
-            text-align: center;
-        }
-
-        .track-item.active .track-play-icon {
-            color: #ffb030;
-        }
-
-        /* ── Mini spinning CD disc ── */
-        .cd-disc {
-            flex-shrink: 0;
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-            position: relative;
-            background:
-                radial-gradient(circle at 50% 50%,
-                    #1a1108 0%,
-                    #1a1108 18%,
-                    transparent 18%),
-                conic-gradient(from 0deg,
-                    rgba(255, 160, 40, 0.35),
-                    rgba(200, 100, 20, 0.2),
-                    rgba(255, 200, 80, 0.4),
-                    rgba(180, 80, 10, 0.2),
-                    rgba(255, 160, 40, 0.35)),
-                radial-gradient(circle, #3a2810 0%, #1a0e04 100%);
-            box-shadow:
-                0 0 0 1px rgba(255, 160, 40, 0.15),
-                inset 0 0 4px rgba(0, 0, 0, 0.6);
-            transition: opacity 0.2s;
-        }
-
-        .cd-disc::before {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 6px;
-            height: 6px;
-            border-radius: 50%;
-            background: #0e0804;
-            border: 1px solid rgba(255, 160, 40, 0.2);
-            box-shadow: 0 0 3px rgba(255, 140, 20, 0.3);
-        }
-
-        .cd-disc::after {
-            content: '';
-            position: absolute;
-            top: 2px;
-            left: 4px;
-            width: 7px;
-            height: 4px;
-            border-radius: 50%;
-            background: rgba(255, 220, 120, 0.22);
-            transform: rotate(-30deg);
-            pointer-events: none;
-        }
-
-        .track-item.active .cd-disc {
-            animation: cdSpin 3s linear infinite;
-            box-shadow:
-                0 0 0 1px rgba(255, 160, 40, 0.4),
-                0 0 8px rgba(255, 140, 20, 0.25),
-                inset 0 0 4px rgba(0, 0, 0, 0.5);
-        }
-
-        @keyframes cdSpin {
-            from { transform: rotate(0deg); }
-            to   { transform: rotate(360deg); }
-        }
-
-        /* LCD List button placed right after the LCD display */
-        .lcd-list-btn {
-            font-family: 'Share Tech Mono', monospace;
-            cursor: pointer;
-            border-radius: 6px;
-            margin: 0 4px 0 8px;
-            padding: 6px 10px;
-            min-height: 38px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 2px;
-            user-select: none;
-            flex-shrink: 0;
-            background: linear-gradient(180deg, #3d2a10 0%, #2a1c08 60%, #1c1305 100%);
-            border: 1px solid rgba(255, 160, 40, 0.3);
-            box-shadow:
-                0 2px 0 rgba(0, 0, 0, 0.6),
-                0 3px 6px rgba(0, 0, 0, 0.4),
-                inset 0 1px 0 rgba(255, 180, 60, 0.2);
-            color: rgba(255, 180, 60, 0.85);
-            transition: transform 0.08s ease, box-shadow 0.08s ease, color 0.2s, background 0.2s, border-color 0.2s;
-            touch-action: manipulation;
-        }
-
-        .lcd-list-btn:hover,
-        .lcd-list-btn:focus-visible {
-            color: #ffb830;
-            border-color: rgba(255, 180, 40, 0.6);
-            box-shadow:
-                0 2px 0 rgba(0, 0, 0, 0.6),
-                0 0 10px rgba(255, 160, 40, 0.3),
-                inset 0 1px 0 rgba(255, 200, 80, 0.3);
-            outline: none;
-        }
-
-        .lcd-list-btn.pressed,
-        .lcd-list-btn:active {
-            transform: translateY(2px);
-            box-shadow:
-                0 0 0 rgba(0, 0, 0, 0.6),
-                0 1px 3px rgba(0, 0, 0, 0.4),
-                inset 0 2px 4px rgba(0, 0, 0, 0.6);
-        }
-
-        .lcd-list-btn.active {
-            background: linear-gradient(180deg, #5a3a08 0%, #3e2606 60%, #2b1a04 100%);
-            color: #ffc040;
-            border-color: rgba(255, 190, 60, 0.7);
-            box-shadow:
-                0 2px 0 rgba(0, 0, 0, 0.6),
-                0 0 12px rgba(255, 160, 40, 0.4),
-                inset 0 1px 0 rgba(255, 220, 100, 0.4);
-        }
-
-        .lcd-btn-icon {
-            font-size: 11px;
-            line-height: 1;
-        }
-
-        .lcd-btn-text {
-            font-size: 8px;
-            letter-spacing: 0.12em;
-            font-weight: bold;
-            line-height: 1;
-        }
-
-        /* List button in presets row */
-        .list-btn {
-            font-family: 'Share Tech Mono', monospace;
-            cursor: pointer;
-            border-radius: 4px;
-            padding: 5px 10px;
-            min-height: 38px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 1px;
-            user-select: none;
-            transition: transform 0.08s ease, box-shadow 0.08s ease, color 0.2s;
-            background: linear-gradient(180deg, #3a2810 0%, #2a1c08 55%, #1e1506 100%);
-            border: 1px solid rgba(255, 160, 40, 0.25);
-            box-shadow: 0 3px 0 rgba(0, 0, 0, 0.5), 0 4px 8px rgba(0, 0, 0, 0.4),
-                inset 0 1px 0 rgba(255, 180, 60, 0.12);
-            color: rgba(255, 160, 40, 0.75);
-            touch-action: manipulation;
-        }
-
-        .list-btn:hover,
-        .list-btn:focus-visible {
-            color: rgba(255, 200, 80, 1);
-            outline: none;
-        }
-
-        .list-btn:active {
-            transform: translateY(2px);
-        }
-
-        .list-btn.active {
-            color: #ffb030;
-            border-color: rgba(255, 180, 40, 0.5);
-            box-shadow: 0 3px 0 rgba(0, 0, 0, 0.5), 0 0 10px rgba(220, 140, 20, 0.2),
-                inset 0 1px 0 rgba(255, 200, 60, 0.18);
-        }
-
-        /* Track index on LCD */
-        .lcd-track-idx {
-            position: absolute;
-            top: 5px;
-            right: 8px;
-            font-family: 'Share Tech Mono', monospace;
-            font-size: 9px;
-            color: rgba(255, 160, 40, 0.4);
-            letter-spacing: 0.06em;
-        }
-
-        /* Progress bar below LCD shell */
+        /* 3D Skeuomorphic Debossed Progress Slider */
         .progress-wrap {
             display: flex;
             align-items: center;
@@ -370,77 +26,46 @@
             padding: 0 2px;
             user-select: none;
         }
-
-        .progress-bar-bg {
-            flex: 1;
-            height: 6px;
-            border-radius: 3px;
-            background: rgba(255, 160, 40, 0.12);
-            cursor: pointer;
-            position: relative;
-            touch-action: none;
-        }
-
-        .progress-bar-fill {
-            height: 100%;
-            border-radius: 3px;
-            background: linear-gradient(90deg, #c87020, #ffb030);
-            width: 0%;
-            transition: width 0.2s linear;
-            pointer-events: none;
-        }
-
-        .progress-time {
-            font-family: 'Share Tech Mono', monospace;
-            font-size: 9px;
-            color: rgba(200, 140, 50, 0.5);
-            flex-shrink: 0;
-            width: 36px;
-            text-align: right;
-        }
     </style>
 </head>
 
 <body>
 
+    <!-- ══ VINTAGE BOLLYWOOD TITLE ══ -->
+    <header class="site-header" role="banner">
+        <h1 class="site-title hindi-retro-title">
+            <span class="hindi-line">दर्श</span>
+            <span class="hindi-line">प्लेलिस्ट</span>
+        </h1>
+    </header>
+
     <!-- ══ Background Video Loop ══ -->
-    <video class="bg-video" autoplay muted loop playsinline poster="./bg.png" aria-hidden="true">
-        <source src="./make_a_loop_video_of_this_imag.mp4" type="video/mp4">
+    <video class="bg-video" autoplay muted loop playsinline aria-hidden="true">
+        <source src="make_a_loop_video_of_this_imag.mp4" type="video/mp4">
     </video>
 
-    <!-- Hidden Audio Player Engine (Reused single player instance) -->
-    <div id="yt-player-wrap" aria-hidden="true">
-        <div id="yt-player"></div>
-    </div>
-
-    <!-- Official YouTube IFrame API -->
-    <script src="https://www.youtube.com/iframe_api"></script>
-
-    <!-- ── Retro Playlist Tray ── -->
-    <div class="playlist-tray" id="playlistTray" role="region" aria-label="Song Playlist">
-        <div class="tray-handle" id="trayHandle" role="button" tabindex="0" aria-label="Toggle Playlist Tray" aria-expanded="false">
-            <span>♫ &nbsp;PLAYLIST &nbsp;·&nbsp; 44 TRACKS</span>
-            <span class="tray-arrow" aria-hidden="true">▲</span>
-        </div>
-        <div class="tray-body" id="trackList" role="list"></div>
-    </div>
+    <!-- Hidden Local Audio Player Engine -->
+    <audio id="radioAudioEngine" preload="auto"></audio>
 
     <div class="scene">
 
         <!-- ══ RADIO BODY ══════════════════════════════════════════════════ -->
-        <main class="radio-body" role="region" aria-label="DARSH FM Radio Player">
+        <main class="radio-body" role="region" aria-label="DARSH Cyber Radio Player">
 
             <!-- Antenna -->
             <div class="antenna-base" aria-hidden="true">
                 <div class="antenna-pole"></div>
             </div>
 
-            <!-- ── SPEAKER (left) ── -->
-            <div class="speaker-panel" aria-hidden="true">
-                <div class="speaker-grille"></div>
-                <div class="speaker-logo">
+            <!-- ── LEFT MINI CRT VIDEO SCREEN ── -->
+            <div class="speaker-panel" role="region" aria-label="Music Video Screen">
+                <div class="radio-tv-screen">
+                    <video id="radioVideo" class="radio-screen-video" playsinline preload="auto"></video>
+                    <div class="tv-crt-overlay" aria-hidden="true"></div>
+                </div>
+                <div class="speaker-logo" aria-hidden="true">
                     <span class="logo-text">DARSH</span>
-                    <span class="logo-sub">FM · RADIO</span>
+                    <span class="logo-sub">CYBER.FM // v2.4</span>
                 </div>
             </div>
 
@@ -456,13 +81,8 @@
                             <span class="lcd-mhz">MHz</span>
                         </div>
                         <div class="lcd-meta" id="lcdMeta">DARSH RADIO · READY TO PLAY</div>
-                        <span class="lcd-track-idx" id="lcdIdx">01/44</span>
+                        <span class="lcd-track-idx" id="lcdIdx" style="font-family:'JetBrains Mono',monospace;font-size:9px;color:#ff9900;letter-spacing:0.08em;">01/39</span>
                     </div>
-                    <!-- Playlist toggle button right after the screen -->
-                    <button class="lcd-list-btn" id="lcdListBtn" title="Toggle Playlist" aria-label="Toggle Playlist Drawer">
-                        <span class="lcd-btn-icon" aria-hidden="true">♫</span>
-                        <span class="lcd-btn-text">LIST</span>
-                    </button>
                     <div class="signal-leds" id="signalLeds" aria-hidden="true">
                         <span></span><span></span><span></span><span></span>
                         <span></span><span></span><span></span><span></span>
@@ -507,9 +127,6 @@
                         <button class="preset-btn" data-freq="107.2" data-meta="DARSH DEEP · ABYSSAL" aria-label="Preset 4: 107.2 MHz">
                             <span class="p-num">4</span><span class="p-freq">107.2</span>
                         </button>
-                        <button class="list-btn" id="listBtn" aria-label="Open Playlist">
-                            <span class="p-num">♫</span><span class="p-freq">LIST</span>
-                        </button>
                     </div>
                 </div>
 
@@ -521,7 +138,7 @@
                 <!-- Volume knob -->
                 <div class="knob-group">
                     <div class="knob-label" id="volLabel">VOL</div>
-                    <div class="knob-ring" role="slider" aria-labelledby="volLabel" aria-valuemin="0" aria-valuemax="100" aria-valuenow="75" tabindex="0">
+                    <div class="knob-ring" role="slider" aria-labelledby="volLabel" aria-valuemin="0" aria-valuemax="100" aria-valuenow="80" tabindex="0">
                         <div class="knob" id="volKnob">
                             <div class="knob-marker"></div>
                             <div class="knob-shine"></div>
@@ -554,7 +171,7 @@
                 <!-- Tune knob — drag ↑ next · drag ↓ prev -->
                 <div class="knob-group">
                     <div class="knob-label" id="tuneLabel">TUNE</div>
-                    <div class="knob-ring" role="slider" aria-labelledby="tuneLabel" aria-valuemin="1" aria-valuemax="44" aria-valuenow="1" tabindex="0">
+                    <div class="knob-ring" role="slider" aria-labelledby="tuneLabel" aria-valuemin="1" aria-valuemax="39" aria-valuenow="1" tabindex="0">
                         <div class="knob" id="tuneKnob">
                             <div class="knob-marker"></div>
                             <div class="knob-shine"></div>
@@ -569,183 +186,154 @@
             </div>
 
         </main><!-- /radio-body -->
+
+        <!-- ══ Spider-Man Character Figure (Covers Gemini Logo) ══ -->
+        <div class="character-wrapper" aria-hidden="true">
+            <img src="asstes/105059-the-spider-man-into-spider-verse-png-download-free.png" alt="Spider-Man" class="spiderman-figure">
+        </div>
     </div><!-- /scene -->
 
     <script>
         // ════════════════════════════════════════════════════════════════════════════
-        // 1. PLAYLIST DATA (Structured with Provider Information)
+        // 1. PLAYLIST DATA (All 39 local tracks in asstes/music/)
         // ════════════════════════════════════════════════════════════════════════════
         const PLAYLIST = [
-            { id: "song-01", title: "Arz Kiya Hai",            artist: "Anuv Jain",                  provider: "youtube", videoId: "bP8ATWCvqzw" },
-            { id: "song-02", title: "Jo Tum Mere Ho",          artist: "Anuv Jain",                  provider: "youtube", videoId: "1K9487uM1u0" },
-            { id: "song-03", title: "Husn",                    artist: "Anuv Jain",                  provider: "youtube", videoId: "gJLVTKhTnog" },
-            { id: "song-04", title: "Finding Her",             artist: "Kushagra, Bharath, Saaheal", provider: "youtube", videoId: "P8cT2Hy96SU" },
-            { id: "song-05", title: "Paro",                    artist: "Aditya Rikhari",             provider: "youtube", videoId: "F3G8gN-y_Dk" },
-            { id: "song-06", title: "Afsos",                   artist: "Anuv Jain, AP Dhillon",      provider: "youtube", videoId: "4fB8f-c3c_Y" },
-            { id: "song-07", title: "Haseen",                  artist: "Talwiinder",                 provider: "youtube", videoId: "uK48_Jz154I" },
-            { id: "song-08", title: "Woh Lamhe Woh Baatein",   artist: "Atif Aslam",                 provider: "youtube", videoId: "5FegZzMj_uA" },
-            { id: "song-09", title: "Dooron Dooron",           artist: "Paresh Pahuja",              provider: "youtube", videoId: "qZ1uB1NQKQY" },
-            { id: "song-10", title: "Sahiba",                  artist: "Aditya Rikhari",             provider: "youtube", videoId: "6P6C4Jd9O9w" },
-            { id: "song-11", title: "Wishes (Remake)",         artist: "Talwiinder",                 provider: "youtube", videoId: "oE7lU2qj4rY" },
-            { id: "song-12", title: "12 Years",                artist: "Lucky Rathore",              provider: "youtube", videoId: "Tl9JGFRrfIM" },
-            { id: "song-13", title: "Khat",                    artist: "Navjot Ahuja",               provider: "youtube", videoId: "BqMNhBWJCbo" },
-            { id: "song-14", title: "Jaan Se Guzarte Hain",    artist: "Shashwat Sachdev",           provider: "youtube", videoId: "hB8KW6Vn9j8" },
-            { id: "song-15", title: "Jaiye Sajana",            artist: "Shashwat Sachdev",           provider: "youtube", videoId: "E8PKTB-jLqE" },
-            { id: "song-16", title: "Aaj Se Teri",             artist: "Arijit Singh",               provider: "youtube", videoId: "L2G349_h49I" },
-            { id: "song-17", title: "Teri Teri Yaad",          artist: "Atif Aslam",                 provider: "youtube", videoId: "5Fh1VK9Xj5A" },
-            { id: "song-18", title: "Yeh Fitoor Mera",         artist: "Arijit Singh",               provider: "youtube", videoId: "B65H9G10g3k" },
-            { id: "song-19", title: "Bairan",                  artist: "Banjaare",                   provider: "youtube", videoId: "NZQNfMT7lWs" },
-            { id: "song-20", title: "Jugni Kehndiya",          artist: "Tochi Raina",                provider: "youtube", videoId: "qzLtJu-ZI_0" },
-            { id: "song-21", title: "Jhol (Acoustic)",         artist: "Maanu, Annural Khalid",      provider: "youtube", videoId: "7-GJHPPedpE" },
-            { id: "song-22", title: "Safar",                   artist: "Bayaan",                     provider: "youtube", videoId: "UJkNQgBCUvQ" },
-            { id: "song-23", title: "Koodappirannor",          artist: "Sooraj Santhosh, Nila Raj",  provider: "youtube", videoId: "9O7xL6RxnTA" },
-            { id: "song-24", title: "Udi Udi",                 artist: "Aneesh, Sarkar",             provider: "youtube", videoId: "JpvZB7ZFUQE" },
-            { id: "song-25", title: "Deewaana Deewaana",       artist: "A.R. Rahman",                provider: "youtube", videoId: "r7bUPL3P99Q" },
-            { id: "song-26", title: "Othayadi Pathayila",      artist: "Dhibu Ninan Thomas",         provider: "youtube", videoId: "lPqmB7MbCVA" },
-            { id: "song-27", title: "Paaro",                   artist: "Aditya Rikhari",             provider: "youtube", videoId: "F3G8gN-y_Dk" },
-            { id: "song-28", title: "Ehsaas",                  artist: "Faheem Abdullah",            provider: "youtube", videoId: "Q8wHBNAn42A" },
-            { id: "song-29", title: "Ishqa Ve",                artist: "Zeeshan Ali",                provider: "youtube", videoId: "ZLlkl0Oqbv8" },
-            { id: "song-30", title: "Teri Deewani",            artist: "Kailash Kher",               provider: "youtube", videoId: "FH8bTKMcRNQ" },
-            { id: "song-31", title: "Darkhaast",               artist: "Arijit Singh",               provider: "youtube", videoId: "A8-5L1qP-8U" },
-            { id: "song-32", title: "Tenu Sang Rakhna",        artist: "Arijit Singh",               provider: "youtube", videoId: "0k57_u0b3aQ" },
-            { id: "song-33", title: "Bulleya",                 artist: "Papon",                      provider: "youtube", videoId: "MzFGDIJuRnQ" },
-            { id: "song-34", title: "Kun Faya Kun",            artist: "A.R. Rahman",                provider: "youtube", videoId: "T94PHkCQBCQ" },
-            { id: "song-35", title: "Dil To Bachcha Hai",      artist: "Rahat Fateh Ali Khan",       provider: "youtube", videoId: "yqFDWtFbxPg" },
-            { id: "song-36", title: "Raabta",                  artist: "Arijit Singh",               provider: "youtube", videoId: "sS6-P1d5H-g" },
-            { id: "song-37", title: "O Rangrez",               artist: "Shreya Ghoshal",             provider: "youtube", videoId: "W5GBH6YsGWg" },
-            { id: "song-38", title: "Kaise Hua",               artist: "Vishal Mishra",              provider: "youtube", videoId: "Fp8msa5uYsc" },
-            { id: "song-39", title: "Tu Chahiye",              artist: "Atif Aslam",                 provider: "youtube", videoId: "zuvla6ABKbs" },
-            { id: "song-40", title: "Finding Her (Female)",    artist: "Kushagra, Saaheal",          provider: "youtube", videoId: "P8cT2Hy96SU" },
-            { id: "song-41", title: "Zindagi Kuch Toh Bata",   artist: "Jubin Nautiyal",             provider: "youtube", videoId: "3hq9SxcJjuQ" },
-            { id: "song-42", title: "Mann Mera",               artist: "Gajendra Verma",             provider: "youtube", videoId: "F0f5nB4h0r4" },
-            { id: "song-43", title: "Tera Ghata",              artist: "Gajendra Verma",             provider: "youtube", videoId: "K3-a8l2gH6k" },
-            { id: "song-44", title: "O Saathi",                artist: "Atif Aslam",                 provider: "youtube", videoId: "7R6FoUE7yM8" },
+            { id: "song-01", title: "Kun Faya Kun", artist: "A.R. Rahman, Javed Ali, Mohit Chauhan", src: "asstes/music/ROCKSTAR Kun Faya Kun (Full Video Song)  Ranbir Kapoor  A.R. Rahman, Javed Ali, Mohit Chauhan_1080p.mp4" },
+            { id: "song-02", title: "Teri Deewani", artist: "Kailash Kher", src: "asstes/music/Teri Deewani - Kailash Kher  Official Video  Kailasa  Paresh  Naresh_480p.mp4" },
+            { id: "song-03", title: "Bulleya", artist: "Papon, Vishal & Shekhar", src: "asstes/music/Bulleya  Full Song  Sultan  Salman Khan, Anushka Sharma  Papon  Vishal & Shekhar  Irshad Kamil_1080p.mp4" },
+            { id: "song-04", title: "O Rangrez", artist: "Shreya Ghoshal, Javed Bashir", src: "asstes/music/O Rangrez Full Video - Bhaag Milkha BhaagFarhan, SonamShreya Ghoshal, Javed Bashir_1080p.mp4" },
+            { id: "song-05", title: "Jugni (Bulle Shah)", artist: "Tochi Raina", src: "asstes/music/Jugni Bulle Shah Tochi Raina - with Lyrics_1080p.mp4" },
+            { id: "song-06", title: "Aaj Se Teri", artist: "Arijit Singh, Amit Trivedi", src: "asstes/music/Aaj Se Teri  Padman  Akshay Kumar & Radhika Apte  Arijit Singh  Amit Trivedi_1080p.mp4" },
+            { id: "song-07", title: "Darkhaast", artist: "Arijit Singh, Sunidhi Chauhan", src: "asstes/music/DARKHAAST Full Video Song   SHIVAAY  Arijit Singh & Sunidhi Chauhan  Ajay Devgn  T-Series_1080p.mp4" },
+            { id: "song-08", title: "Kaise Hua", artist: "Vishal Mishra", src: "asstes/music/LYRICAL Kaise Hua  Kabir Singh  Shahid K, Kiara A, Sandeep V  Vishal Mishra, Manoj Muntashir_1080p.mp4" },
+            { id: "song-09", title: "Raabta (Kehte Hain Khuda)", artist: "Arijit Singh, Pritam", src: "asstes/music/Raabta (Kehte Hain Khuda) Full Song With Lyrics  Agent Vinod  Saif Ali Khan, Kareena Kapoor,Pritam_1080p.mp4" },
+            { id: "song-10", title: "Tu Chahiye", artist: "Atif Aslam, Pritam", src: "asstes/music/Tu Chahiye FULL VIDEO Song - Atif Aslam Pritam  Bajrangi Bhaijaan  Salman Khan, Kareena Kapoor_1080p.mp4" },
+            { id: "song-11", title: "O Saathi", artist: "Atif Aslam, Arko", src: "asstes/music/O Saathi Video Song  Baaghi 2  Tiger Shroff  Disha Patani  Arko  Ahmed Khan  Sajid Nadiadwala_1080p.mp4" },
+            { id: "song-12", title: "Yeh Fitoor Mera", artist: "Arijit Singh, Amit Trivedi", src: "asstes/music/Yeh Fitoor Mera - Full Video  Fitoor  Aditya Roy Kapur, Katrina Kaif  Arijit Singh  Amit Trivedi_1080p.mp4" },
+            { id: "song-13", title: "Deewaana Deewaana", artist: "A.R. Rahman, Dhanush", src: "asstes/music/Deewaana Deewaana (Full Video) Tere Ishk Mein  Dhanush, Kriti  AR Rahman  Aanand LR  Bhushan K_1080p.mp4" },
+            { id: "song-14", title: "Tenu Sang Rakhna", artist: "Arijit Singh, Achint, Anumita", src: "asstes/music/Tenu Sang Rakhna - Full Song Audio  Jigra  Alia Bhatt  Vedang Raina  Arijit Singh,Achint,Anumita_1080p.mp4" },
+            { id: "song-15", title: "Finding Her", artist: "Kushagra, Vanshika, Bharath", src: "asstes/music/Finding Her (Jana Mere Sawalon Ka Manzar Tu)  Kushagra  Vanshika  Bharath  Karan Maini UR Debut_1080p.mp4" },
+            { id: "song-16", title: "Finding Her (Female Version)", artist: "Tanishka Bahl, Kushagra", src: "asstes/music/Finding Her (Female Version)  Tanishka Bahl  Kushagra  Bharath  Saaheal  UR Debut  New Songs_1080p.mp4" },
+            { id: "song-17", title: "Ishqa Ve", artist: "Zeeshan Ali", src: "asstes/music/Ishqa Ve - Zeeshan Ali  Yuvraj Tung  Seerat Mast  Sandeep Aulakh  Latest Punjabi Songs 2025_1080p.mp4" },
+            { id: "song-18", title: "Jhaag", artist: "Chaar Diwaari", src: "asstes/music/Chaar Diwaari - Jhaag (Official Video)  Def Jam India_1080p.mp4" },
+            { id: "song-19", title: "MERA SAMAN KAHAN HAI", artist: "Chaar Diwaari", src: "asstes/music/Chaar Diwaari - MERA SAMAN KAHAN HAI (Official Video)  TERI MAIYAT KE GAANE EP_1080p.mp4" },
+            { id: "song-20", title: "Thehra", artist: "Chaar Diwaari", src: "asstes/music/Chaar Diwaari - Thehra (Official Video)  Pyaar Diwaari Arc 1  Def Jam India_1080p.mp4" },
+            { id: "song-21", title: "FAREBI", artist: "Chaar Diwaari x Raftaar", src: "asstes/music/Chaar Diwaari X @raftaarmusic  - FAREBI (Official Video)  Pyaar Diwaari Arc 3_1080p.mp4" },
+            { id: "song-22", title: "Aashiqana", artist: "Chaar Diwaari ft. Indian Ocean, Gini", src: "asstes/music/Chaar Diwaari ft. Indian Ocean, Gini - Aashiqana  Parvana EP  Def Jam India_1080p.mp4" },
+            { id: "song-23", title: "Iss Tarah", artist: "Chaar Diwaari ft. Sonu Nigam", src: "asstes/music/Chaar Diwaari ft. Sonu Nigam - Iss Tarah  Parvana EP  Def Jam India_1080p.mp4" },
+            { id: "song-24", title: "Banda Kaam Ka", artist: "Chaar Diwaari x Sanjith Hegde", src: "asstes/music/Chaar Diwaari x Sanjith Hegde - Banda Kaam Ka (Official Video)  Parvana EP  Def Jam India_1080p.mp4" },
+            { id: "song-25", title: "Safar", artist: "Bayaan, Sherazam", src: "asstes/music/Bayaan  Sherazam - Safar_1080p.mp4" },
+            { id: "song-26", title: "Bairan", artist: "Banjaare", src: "asstes/music/Bairan – Animated Love Story  Banjaare (Official Video)_1080p.mp4" },
+            { id: "song-27", title: "HASEEN", artist: "Talwiinder, NDS, Rippy", src: "asstes/music/HASEEN - TALWIINDER, NDS, RIPPY (Official Visualizer)_1080p.mp4" },
+            { id: "song-28", title: "Jhol (Acoustic)", artist: "Maanu, Annural Khalid, Abdullah Siddiqui", src: "asstes/music/Maanu - Jhol (Acoustic)  Annural Khalid  Abdullah Siddiqui  Asfand_1080p.mp4" },
+            { id: "song-29", title: "Khat (Lyrical)", artist: "Navjot Ahuja", src: "asstes/music/Navjot Ahuja - Khat (Lyrical Video)_1080p.mp4" },
+            { id: "song-30", title: "Khat (Official Audio)", artist: "Navjot Ahuja", src: "asstes/music/Navjot Ahuja - Khat (Official Audio)_1080p.mp4" },
+            { id: "song-31", title: "Dooron Dooron (Unplugged)", artist: "Paresh Pahuja, Shiv Tandan", src: "asstes/music/Dooron Dooron (Official Video) - Unplugged  Paresh Pahuja  Shiv Tandan  T-Series_1080p.mp4" },
+            { id: "song-32", title: "Dil To Bachcha Hai Ji", artist: "Rahat Fateh Ali Khan", src: "asstes/music/Dil To Bachcha Hai Ji HD 5.1 Sound ll Ishqiya 2010 ll Rahat Fateh Ali Khan ll 4k & 1080p HD ll_1080p.mp4" },
+            { id: "song-33", title: "Zindagi Kuch Toh Bata (Reprise)", artist: "Rahat Fateh Ali Khan, Pritam", src: "asstes/music/Zindagi Kuch Toh Bata (Reprise) Full Song with LYRICS Pritam  Salman Khan  Bajrangi Bhaijaan_1080p.mp4" },
+            { id: "song-34", title: "TERI TERI YAAD", artist: "Gyanii Sangeet", src: "asstes/music/TERI TERI YAAD  GYANII SANGEET  FULL VIDEO_1080p.mp4" },
+            { id: "song-35", title: "Othaiyadi Pathayila", artist: "Dhibu Ninan Thomas, Anirudh", src: "asstes/music/Kanaa - Othaiyadi Pathayila Video  Arunraja Kamaraj  Dhibu Ninan Thomas_1080p.mp4" },
+            { id: "song-36", title: "Koodappirannor", artist: "Sooraj Santhosh, Ankit Menon", src: "asstes/music/Koodappirannor - Video  Vaazha 2  Parvatish PradeepSooraj SanthoshAnkit MenonVipin DasSavin SA_1080p.mp4" },
+            { id: "song-37", title: "12 Years", artist: "Lucky Rathore ft. PnkjOfficial", src: "asstes/music/12 Years - Lucky Rathore ft. @PnkjOfficial   Prod. Maxx Turnn  2025_1080p.mp4" },
+            { id: "song-38", title: "UDI UDI", artist: "Aneesh Poojari & Sarkar Music", src: "asstes/music/UDI UDI   @Aneesh.Poojari &_ @sarkarmusic.25  The Collective Tape  Official Music Video_1080p.mp4" },
+            { id: "song-39", title: "Darsh Midnight Frequency", artist: "Darsh Radio Special", src: "asstes/music/_1080p.mp4" }
         ];
 
         // ════════════════════════════════════════════════════════════════════════════
-        // 2. PROVIDER ADAPTER: YouTube Provider
+        // 2. LOCAL MEDIA PROVIDER (Seamless local HTML5 playback)
         // ════════════════════════════════════════════════════════════════════════════
-        class YouTubeProvider {
+        class LocalMediaProvider {
             constructor() {
-                this.player = null;
+                this.media = null;
                 this.isReady = false;
                 this.callbacks = {};
-                this.currentVideoId = null;
-                this.loadToken = 0;
+                this.currentTrack = null;
             }
 
             init(callbacks) {
                 this.callbacks = callbacks;
-                if (window.YT && window.YT.Player) {
-                    this._createPlayer();
-                } else {
-                    window.onYouTubeIframeAPIReady = () => this._createPlayer();
+                this.media = document.getElementById('radioVideo');
+                if (!this.media) {
+                    this.media = document.createElement('video');
+                    this.media.id = 'radioVideo';
+                    this.media.playsInline = true;
+                    this.media.preload = 'auto';
+                    document.body.appendChild(this.media);
                 }
-            }
 
-            _createPlayer() {
-                this.player = new YT.Player('yt-player', {
-                    height: '120', width: '200',
-                    videoId: PLAYLIST[0].videoId,
-                    playerVars: {
-                        autoplay: 0,
-                        controls: 0,
-                        rel: 0,
-                        modestbranding: 1,
-                        iv_load_policy: 3,
-                        disablekb: 1,
-                        playsinline: 1,
-                        enablejsapi: 1,
-                    },
-                    events: {
-                        onReady: (e) => {
-                            this.isReady = true;
-                            if (this.callbacks.onReady) this.callbacks.onReady();
-                        },
-                        onStateChange: (e) => {
-                            const S = YT.PlayerState;
-                            if (e.data === S.PLAYING) {
-                                if (this.callbacks.onPlay) this.callbacks.onPlay();
-                            } else if (e.data === S.PAUSED) {
-                                if (this.callbacks.onPause) this.callbacks.onPause();
-                            } else if (e.data === S.ENDED) {
-                                if (this.callbacks.onEnd) this.callbacks.onEnd();
-                            } else if (e.data === S.BUFFERING) {
-                                if (this.callbacks.onBuffering) this.callbacks.onBuffering();
-                            }
-                        },
-                        onError: (e) => {
-                            if (this.callbacks.onError) this.callbacks.onError(e.data);
-                        }
+                this.media.addEventListener('canplay', () => {
+                    if (!this.isReady) {
+                        this.isReady = true;
+                        if (this.callbacks.onReady) this.callbacks.onReady();
                     }
                 });
+
+                this.media.addEventListener('play', () => {
+                    if (this.callbacks.onPlay) this.callbacks.onPlay();
+                });
+
+                this.media.addEventListener('pause', () => {
+                    if (this.callbacks.onPause) this.callbacks.onPause();
+                });
+
+                this.media.addEventListener('ended', () => {
+                    if (this.callbacks.onEnd) this.callbacks.onEnd();
+                });
+
+                this.media.addEventListener('waiting', () => {
+                    if (this.callbacks.onBuffering) this.callbacks.onBuffering();
+                });
+
+                this.media.addEventListener('error', (e) => {
+                    console.warn('Playback error, auto-recovering:', e);
+                    if (this.callbacks.onError) this.callbacks.onError(e);
+                });
+
+                this.isReady = true;
+                if (this.callbacks.onReady) this.callbacks.onReady();
             }
 
             loadTrack(track, autoPlay = true) {
-                if (!this.isReady || !this.player) return;
-                const token = ++this.loadToken;
-                this.currentVideoId = track.videoId;
-
-                // Execute on next tick to prevent rapid click collision
-                setTimeout(() => {
-                    if (token !== this.loadToken) return; // Discard superseded requests
-                    try {
-                        if (autoPlay) {
-                            this.player.loadVideoById({ videoId: track.videoId, startSeconds: 0 });
-                            this.player.playVideo();
-                        } else {
-                            this.player.cueVideoById({ videoId: track.videoId, startSeconds: 0 });
-                        }
-                    } catch (err) {
-                        console.error('YouTubeProvider error loading track:', err);
-                    }
-                }, 20);
+                this.currentTrack = track;
+                this.media.src = track.src;
+                this.media.load();
+                if (autoPlay) {
+                    this.media.play().catch(e => {
+                        console.log('Autoplay waiting for user interaction:', e);
+                    });
+                }
             }
 
             play() {
-                if (this.isReady && this.player) {
-                    try { this.player.playVideo(); } catch (e) { }
+                if (this.media) {
+                    this.media.play().catch(e => console.log('Play request received:', e));
                 }
             }
 
             pause() {
-                if (this.isReady && this.player) {
-                    try { this.player.pauseVideo(); } catch (e) { }
+                if (this.media) {
+                    this.media.pause();
                 }
             }
 
             seek(seconds) {
-                if (this.isReady && this.player) {
-                    try { this.player.seekTo(seconds, true); } catch (e) { }
+                if (this.media && Number.isFinite(seconds)) {
+                    this.media.currentTime = seconds;
                 }
             }
 
             setVolume(volume) {
-                if (this.isReady && this.player) {
-                    try { this.player.setVolume(Math.max(0, Math.min(100, volume))); } catch (e) { }
+                if (this.media) {
+                    this.media.volume = Math.max(0, Math.min(1, volume / 100));
                 }
             }
 
             getCurrentTime() {
-                if (this.isReady && this.player && typeof this.player.getCurrentTime === 'function') {
-                    try { return this.player.getCurrentTime() || 0; } catch (e) { }
-                }
-                return 0;
+                return this.media ? (this.media.currentTime || 0) : 0;
             }
 
             getDuration() {
-                if (this.isReady && this.player && typeof this.player.getDuration === 'function') {
-                    try { return this.player.getDuration() || 0; } catch (e) { }
-                }
-                return 0;
-            }
-
-            destroy() {
-                if (this.player && typeof this.player.destroy === 'function') {
-                    try { this.player.destroy(); } catch (e) { }
-                }
-                this.player = null;
-                this.isReady = false;
+                return this.media ? (this.media.duration || 0) : 0;
             }
         }
 
@@ -761,7 +349,7 @@
                 this.isReady = false;
                 this.currentTime = 0;
                 this.duration = 0;
-                this.volume = 75;
+                this.volume = 80;
                 this.isSeeking = false;
                 this.listeners = [];
                 this.progressInterval = null;
@@ -799,7 +387,6 @@
                     },
                     onError: (errCode) => {
                         this._notify('error', errCode);
-                        // Auto-skip after 1.5s on unplayable tracks
                         setTimeout(() => this.next(true), 1500);
                     }
                 });
@@ -844,7 +431,6 @@
             }
 
             previous(autoPlay = true) {
-                // Spotify-style previous: If > 3 seconds, restart current track from 0
                 const curTime = this.provider.getCurrentTime();
                 if (curTime > 3) {
                     this.provider.seek(0);
@@ -900,7 +486,7 @@
         }
 
         // ════════════════════════════════════════════════════════════════════════════
-        // 4. UI TIME FORMATTING (Zero-NaN safety)
+        // 4. UI TIME FORMATTING
         // ════════════════════════════════════════════════════════════════════════════
         function formatTime(seconds) {
             if (!Number.isFinite(seconds) || seconds < 0) {
@@ -914,8 +500,8 @@
         // ════════════════════════════════════════════════════════════════════════════
         // 5. DARSH FM UI CONTROLLER & BINDINGS
         // ════════════════════════════════════════════════════════════════════════════
-        const ytProvider = new YouTubeProvider();
-        const playerController = new PlayerController(PLAYLIST, ytProvider);
+        const localProvider = new LocalMediaProvider();
+        const playerController = new PlayerController(PLAYLIST, localProvider);
 
         // DOM elements
         const playBtn        = document.getElementById('playBtn');
@@ -932,14 +518,8 @@
         const progressFill   = document.getElementById('progressFill');
         const progressBg     = document.getElementById('progressBg');
         const progressTime   = document.getElementById('progressTime');
-        const playlistTray   = document.getElementById('playlistTray');
-        const trayHandle     = document.getElementById('trayHandle');
-        const listBtn        = document.getElementById('listBtn');
-        const lcdListBtn     = document.getElementById('lcdListBtn');
-        const trackList      = document.getElementById('trackList');
 
         let vizRaf = null;
-        let trayOpen = false;
         let volAngle = -100 + (playerController.volume / 100) * 200;
         let tuneAngle = 0;
         let draggingVol = false, volStartY = 0, volStartAngle = volAngle;
@@ -954,53 +534,9 @@
             '107.2': { needle: 0.942 },
         };
 
-        // Render Tracklist
-        function renderPlaylist() {
-            trackList.innerHTML = '';
-            PLAYLIST.forEach((t, i) => {
-                const item = document.createElement('div');
-                item.className = 'track-item' + (i === playerController.currentIndex ? ' active' : '');
-                item.dataset.idx = i;
-                item.setAttribute('role', 'listitem');
-                item.setAttribute('tabindex', '0');
-                item.setAttribute('aria-label', `${t.title} by ${t.artist}`);
-                item.innerHTML = `
-                    <span class="track-num">${String(i + 1).padStart(2, '0')}</span>
-                    <div class="cd-disc" aria-hidden="true"></div>
-                    <div class="track-info">
-                        <div class="track-title">${t.title}</div>
-                        <div class="track-artist">${t.artist}</div>
-                    </div>
-                    <span class="track-play-icon" aria-hidden="true">${i === playerController.currentIndex ? '▶' : ''}</span>`;
-                
-                const onSelect = () => playerController.selectTrack(i, true);
-                item.addEventListener('click', onSelect);
-                item.addEventListener('keydown', (e) => {
-                    if (e.key === 'Enter' || e.key === ' ') {
-                        e.preventDefault();
-                        onSelect();
-                    }
-                });
-                trackList.appendChild(item);
-            });
-        }
-
-        function highlightActiveTrack(idx) {
-            document.querySelectorAll('.track-item').forEach((el, i) => {
-                const isActive = (i === idx);
-                el.classList.toggle('active', isActive);
-                const playIconSpan = el.querySelector('.track-play-icon');
-                if (playIconSpan) playIconSpan.textContent = isActive ? '▶' : '';
-            });
-            const active = trackList.querySelector('.track-item.active');
-            if (active && trayOpen) {
-                active.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
-            }
-        }
-
         function updateLCD(track, idx) {
             lcdMeta.textContent = `${track.title} · ${track.artist}`;
-            lcdIdx.textContent = `${String(idx + 1).padStart(2, '0')}/44`;
+            lcdIdx.textContent = `${String(idx + 1).padStart(2, '0')}/39`;
             lcdFreq.classList.add('flicker');
             setTimeout(() => lcdFreq.classList.remove('flicker'), 180);
         }
@@ -1010,6 +546,7 @@
             stopIcon.style.display = isPlaying ? '' : 'none';
             playBtn.setAttribute('aria-label', isPlaying ? 'Pause Track' : 'Play Track');
             playBtn.setAttribute('aria-pressed', isPlaying ? 'true' : 'false');
+
             if (isPlaying) {
                 playLed.classList.add('on');
                 signalLeds.classList.add('active');
@@ -1029,7 +566,6 @@
                 updatePlayState(false);
             } else if (event === 'trackChange') {
                 updateLCD(data, ctrl.currentIndex);
-                highlightActiveTrack(ctrl.currentIndex);
             } else if (event === 'timeUpdate') {
                 const { currentTime, duration } = data;
                 progressTime.textContent = formatTime(currentTime);
@@ -1044,7 +580,7 @@
         });
 
         // ════════════════════════════════════════════════════════════════════════════
-        // 6. HARDWARE CONTROLS (Play, Progress, Knobs, Presets, Tray)
+        // 6. HARDWARE CONTROLS & BINDINGS
         // ════════════════════════════════════════════════════════════════════════════
         playBtn.addEventListener('click', () => {
             playBtn.classList.add('pressed');
@@ -1170,32 +706,6 @@
             })(performance.now());
         }
 
-        // Toggle Playlist Drawer
-        function toggleDrawer() {
-            trayOpen = !trayOpen;
-            playlistTray.classList.toggle('open', trayOpen);
-            trayHandle.setAttribute('aria-expanded', trayOpen ? 'true' : 'false');
-            if (listBtn) listBtn.classList.toggle('active', trayOpen);
-            if (lcdListBtn) {
-                lcdListBtn.classList.toggle('active', trayOpen);
-                lcdListBtn.classList.add('pressed');
-                setTimeout(() => lcdListBtn.classList.remove('pressed'), 120);
-            }
-            if (trayOpen) {
-                setTimeout(() => {
-                    const active = trackList.querySelector('.track-item.active');
-                    if (active) active.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
-                }, 80);
-            }
-        }
-
-        trayHandle.addEventListener('click', toggleDrawer);
-        trayHandle.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleDrawer(); }
-        });
-        if (listBtn) listBtn.addEventListener('click', toggleDrawer);
-        if (lcdListBtn) lcdListBtn.addEventListener('click', toggleDrawer);
-
         // LED Visualizer
         function startSignalViz() {
             if (vizRaf) return;
@@ -1220,20 +730,19 @@
         // ════════════════════════════════════════════════════════════════════════════
         // 7. INITIALIZE APP
         // ════════════════════════════════════════════════════════════════════════════
-        renderPlaylist();
+        playerController.selectTrack(0, false);
         const initialTrack = playerController.getCurrentTrack();
         lcdMeta.textContent = `${initialTrack.title} · ${initialTrack.artist}`;
-        lcdIdx.textContent = `01/44`;
+        lcdIdx.textContent = `01/39`;
 
-        // Ambient background video loop (0.35x playback speed)
+        // Ambient background video loop — smooth and relaxed 0.75x speed
         const bgVideo = document.querySelector('.bg-video');
         if (bgVideo) {
-            bgVideo.playbackRate = 0.35;
-            bgVideo.addEventListener('loadedmetadata', () => { bgVideo.playbackRate = 0.35; });
-            bgVideo.addEventListener('play', () => { bgVideo.playbackRate = 0.35; });
+            bgVideo.defaultPlaybackRate = 0.75;
+            bgVideo.playbackRate = 0.75;
+            bgVideo.addEventListener('loadedmetadata', () => { bgVideo.playbackRate = 0.75; });
+            bgVideo.addEventListener('play', () => { bgVideo.playbackRate = 0.75; });
         }
-
-        // Smooth radio body entrance animation
         const radioBodyEl = document.querySelector('.radio-body');
         if (radioBodyEl) {
             radioBodyEl.animate([
