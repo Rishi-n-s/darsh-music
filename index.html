@@ -97,7 +97,8 @@
           <div id="yt-player-wrap" class="yt-player-wrap">
             <div id="yt-player"></div>
           </div>
-          <video id="radioVideo" class="radio-screen-video" playsinline preload="auto"></video>
+          <video id="radioVideo" class="radio-screen-video" playsinline muted preload="auto"></video>
+          <audio id="radioAudio" playsinline preload="auto"></audio>
           <div class="tv-crt-overlay" aria-hidden="true"></div>
           <!-- Spider-Man inside Video Screen for Responsive -->
           <div class="tv-spiderman-mini" aria-hidden="true">
@@ -323,12 +324,13 @@
     ];
 
     // ════════════════════════════════════════════════════════════════════════════
-    // 2. HYBRID UNIVERSAL MEDIA PROVIDER (Seamless Local + YouTube Fallback)
+    // 2. HYBRID UNIVERSAL MEDIA PROVIDER (Seamless Local Audio/Video + YouTube Fallback)
     // ════════════════════════════════════════════════════════════════════════════
     class HybridMediaProvider {
       constructor() {
         this.mode = 'local'; // 'local' | 'youtube'
-        this.localMedia = null;
+        this.localMedia = null;  // HTML5 Video (Visual)
+        this.localAudio = null;  // HTML5 Audio (Background Audio Pipeline)
         this.ytPlayer = null;
         this.isReady = false;
         this.callbacks = {};
@@ -341,37 +343,70 @@
       init(callbacks) {
         this.callbacks = callbacks;
         this.localMedia = document.getElementById('radioVideo');
+        this.localAudio = document.getElementById('radioAudio');
 
-        // Setup Local Media events
         if (this.localMedia) {
-          this.localMedia.addEventListener('canplay', () => {
+          this.localMedia.muted = true; // Video is visually synced; audio runs through localAudio
+        }
+
+        // Setup Local Audio events (primary audio engine that runs in background RAM)
+        if (this.localAudio) {
+          this.localAudio.addEventListener('canplay', () => {
             if (this.mode === 'local') {
               this.isReady = true;
               if (this.callbacks.onReady) this.callbacks.onReady();
             }
           });
 
-          this.localMedia.addEventListener('play', () => {
-            if (this.mode === 'local' && this.callbacks.onPlay) this.callbacks.onPlay();
+          this.localAudio.addEventListener('play', () => {
+            if (this.mode === 'local') {
+              if (this.localMedia && !document.hidden) {
+                this.localMedia.currentTime = this.localAudio.currentTime;
+                this.localMedia.play().catch(() => {});
+              }
+              if (this.callbacks.onPlay) this.callbacks.onPlay();
+            }
           });
 
-          this.localMedia.addEventListener('pause', () => {
-            if (this.mode === 'local' && this.callbacks.onPause) this.callbacks.onPause();
+          this.localAudio.addEventListener('pause', () => {
+            if (this.mode === 'local') {
+              if (this.localMedia) this.localMedia.pause();
+              if (this.callbacks.onPause) this.callbacks.onPause();
+            }
           });
 
-          this.localMedia.addEventListener('ended', () => {
+          this.localAudio.addEventListener('ended', () => {
             if (this.mode === 'local' && this.callbacks.onEnd) this.callbacks.onEnd();
           });
 
-          this.localMedia.addEventListener('waiting', () => {
+          this.localAudio.addEventListener('waiting', () => {
             if (this.mode === 'local' && this.callbacks.onBuffering) this.callbacks.onBuffering();
           });
 
-          this.localMedia.addEventListener('error', (e) => {
-            console.warn('Local media file error/pointer detected, falling back to YouTube streaming:', e);
+          this.localAudio.addEventListener('error', (e) => {
+            console.warn('Local audio error, falling back to YouTube streaming:', e);
             this._fallbackToYouTube(true);
           });
         }
+
+        // Keep local video synchronized with audio during active viewing
+        if (this.localMedia) {
+          this.localMedia.addEventListener('error', () => {
+            // If video element errors on mobile backgrounding, ignore and let audio play
+            console.warn('Visual video frame paused in background, keeping audio alive');
+          });
+        }
+
+        // Visibility Change Listener: Seamless background audio when switching apps
+        document.addEventListener('visibilitychange', () => {
+          if (this.mode === 'local' && this.localAudio && !this.localAudio.paused) {
+            if (!document.hidden && this.localMedia) {
+              // App returned to foreground: re-sync CRT video screen
+              this.localMedia.currentTime = this.localAudio.currentTime;
+              this.localMedia.play().catch(() => {});
+            }
+          }
+        });
 
         // Setup YouTube API
         const createYT = () => {
@@ -439,14 +474,25 @@
           return;
         }
 
-        if (this.localMedia && track.src) {
-          this.localMedia.src = track.src;
-          this.localMedia.load();
+        if (this.localAudio && track.src) {
+          this.localAudio.src = track.src;
+          this.localAudio.volume = Math.max(0, Math.min(1, this.volume / 100));
+          this.localAudio.load();
+
+          if (this.localMedia) {
+            this.localMedia.src = track.src;
+            this.localMedia.muted = true;
+            this.localMedia.load();
+          }
+
           if (autoPlay) {
-            const playPromise = this.localMedia.play();
+            const playPromise = this.localAudio.play();
+            if (this.localMedia && !document.hidden) {
+              this.localMedia.play().catch(() => {});
+            }
             if (playPromise && typeof playPromise.catch === 'function') {
               playPromise.catch(e => {
-                console.warn('Local play error, switching to YouTube stream:', e);
+                console.warn('Local audio play error, switching to stream:', e);
                 if (token === this.loadToken) {
                   this._fallbackToYouTube(autoPlay);
                 }
@@ -462,6 +508,7 @@
         this.mode = 'youtube';
         const wrap = document.getElementById('yt-player-wrap');
         if (wrap) wrap.style.display = 'block';
+        if (this.localAudio) this.localAudio.pause();
         if (this.localMedia) {
           this.localMedia.pause();
           this.localMedia.style.display = 'none';
@@ -484,7 +531,6 @@
           }
           this.ytPlayer.setVolume(this.volume);
         } else {
-          // If YT is still loading, wait a moment and retry
           setTimeout(() => {
             if (this.ytPlayer && typeof this.ytPlayer.loadVideoById === 'function') {
               if (autoPlay) this.ytPlayer.loadVideoById(track.videoId);
@@ -501,8 +547,11 @@
             this.ytPlayer.playVideo();
           }
         } else {
-          if (this.localMedia) {
-            this.localMedia.play().catch(() => this._fallbackToYouTube(true));
+          if (this.localAudio) {
+            this.localAudio.play().catch(() => this._fallbackToYouTube(true));
+          }
+          if (this.localMedia && !document.hidden) {
+            this.localMedia.play().catch(() => {});
           }
         }
       }
@@ -513,6 +562,7 @@
             this.ytPlayer.pauseVideo();
           }
         } else {
+          if (this.localAudio) this.localAudio.pause();
           if (this.localMedia) this.localMedia.pause();
         }
       }
@@ -523,6 +573,9 @@
             this.ytPlayer.seekTo(seconds, true);
           }
         } else {
+          if (this.localAudio && Number.isFinite(seconds)) {
+            this.localAudio.currentTime = seconds;
+          }
           if (this.localMedia && Number.isFinite(seconds)) {
             this.localMedia.currentTime = seconds;
           }
@@ -534,8 +587,8 @@
         if (this.ytPlayer && typeof this.ytPlayer.setVolume === 'function') {
           this.ytPlayer.setVolume(this.volume);
         }
-        if (this.localMedia) {
-          this.localMedia.volume = Math.max(0, Math.min(1, this.volume / 100));
+        if (this.localAudio) {
+          this.localAudio.volume = Math.max(0, Math.min(1, this.volume / 100));
         }
       }
 
@@ -543,14 +596,14 @@
         if (this.mode === 'youtube') {
           return (this.ytPlayer && typeof this.ytPlayer.getCurrentTime === 'function') ? (this.ytPlayer.getCurrentTime() || 0) : 0;
         }
-        return this.localMedia ? (this.localMedia.currentTime || 0) : 0;
+        return this.localAudio ? (this.localAudio.currentTime || 0) : 0;
       }
 
       getDuration() {
         if (this.mode === 'youtube') {
           return (this.ytPlayer && typeof this.ytPlayer.getDuration === 'function') ? (this.ytPlayer.getDuration() || 0) : 0;
         }
-        return this.localMedia ? (this.localMedia.duration || 0) : 0;
+        return this.localAudio ? (this.localAudio.duration || 0) : 0;
       }
     }
 
