@@ -150,7 +150,7 @@ body {
     width: min(940px, 95vw);
     height: 225px;
     border-radius: 22px;
-    opacity: 0;
+    opacity: 1;
 
     background:
         linear-gradient(180deg,

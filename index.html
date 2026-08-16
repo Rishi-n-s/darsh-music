@@ -900,6 +900,10 @@
           <svg viewBox="0 0 24 24" width="10" height="10" fill="currentColor">
             <path d="M8 5v14l11-7z"/>
           </svg>
+        ` : '·';
+      }
+    }
+
     // Web MediaSession API for Background Audio & Lock Screen Playback
     function updateMediaSession(track, isPlaying = true) {
       if ('mediaSession' in navigator && track) {
