@@ -121,14 +121,14 @@ body {
     display: none;
 }
 
-/* Specific Portrait Mode & Mobile Screens: Switch to dedicated portrait background video */
-@media (orientation: portrait), (max-width: 680px) {
+/* On ALL responsive, mobile, tablet & portrait screens: Activate the new portrait background video */
+@media (max-width: 920px), (orientation: portrait), (max-aspect-ratio: 1/1) {
     .bg-video-landscape {
-        display: none;
+        display: none !important;
     }
     .bg-video-portrait {
-        display: block;
-        object-position: center center;
+        display: block !important;
+        object-position: center center !important;
     }
 }
 
@@ -1418,9 +1418,12 @@ body {
 }
 
 @media (max-width: 860px) {
-    /* Responsive Background Video Framing directly on the boy leaning on the poster wall */
-    .bg-video {
-        object-position: 57% 35%;
+    .bg-video-landscape {
+        display: none !important;
+    }
+    .bg-video-portrait {
+        display: block !important;
+        object-position: center center !important;
     }
 
     /* Show the sleek floating toggle button */
@@ -1539,9 +1542,12 @@ body {
         align-items: flex-end;
     }
 
-    /* Responsive Background Video Framing directly on the boy leaning on the poster wall */
-    .bg-video {
-        object-position: 57% 32%;
+    .bg-video-landscape {
+        display: none !important;
+    }
+    .bg-video-portrait {
+        display: block !important;
+        object-position: center center !important;
     }
 
     /* Keep top title small and compact so the background and boy are in full view */
@@ -1623,14 +1629,22 @@ body {
 }
 
 @media (max-width: 480px) {
-    .bg-video {
-        object-position: 57% 30%;
+    .bg-video-landscape {
+        display: none !important;
+    }
+    .bg-video-portrait {
+        display: block !important;
+        object-position: center center !important;
     }
 }
 
 @media (max-width: 380px) {
-    .bg-video {
-        object-position: 57% 28%;
+    .bg-video-landscape {
+        display: none !important;
+    }
+    .bg-video-portrait {
+        display: block !important;
+        object-position: center center !important;
     }
 
     .lcd-freq {
